@@ -1,0 +1,60 @@
+#propiedades para ejecucion con directrunner
+#GCP properties
+gcp.projectId=${CDP_PROJECT_ID}
+
+# Dataflow properties
+gcp.df.registro.boletas.appName=${DATAFLOW_JOB_NAME}
+gcp.df.service.account=${SA_DATAFLOW_NAME}
+gcp.df.region=${REGION}
+gcp.df.temp=gs://${DATAFLOW_BUCKET_NAME}/temp
+gcp.df.staging=gs://${DATAFLOW_BUCKET_NAME}/staging
+gcp.df.maxWorkers=${DATAFLOW_MAX_WORKERS}
+gcp.df.usePublicIps=false
+gcp.df.network=https://www.googleapis.com/compute/v1/projects/${VPC_SHARED_PROJECT_ID}/global/networks/${VPC_SHARED_ID}
+gcp.df.subnetwork=https://www.googleapis.com/compute/v1/projects/${VPC_SHARED_PROJECT_ID}/regions/us-east4/subnetworks/${SUBNET_SHARED_ID}
+gcp.df.machineType=${INSTANCE_TYPE}
+#gcp.df.networkTags=use_network_tags=postgres-internal
+gcp.df.update=false
+gcp.df.diskSize=50
+
+# Pub/Sub properties
+gcp.pubsub.topic.registra.boleta=projects/${CDP_PROJECT_ID}/topics/${TOPIC_BOLETA}
+gcp.pubsub.topic.subscription.registra.boleta=projects/${CDP_PROJECT_ID}/subscriptions/${SUB_TOPIC_BOLETA}
+gcp.pubsub.topic.registra.boleta.error=projects/${CDP_PROJECT_ID}/topics/${TOPIC_ERR_BOLETA}
+gcp.pubsub.topic.subscription.registra.boleta.error=projects/${CDP_PROJECT_ID}/subscriptions/${SUB_TOPIC_ERR_BOLETA}
+gcp.pubsub.topic.boleta.vinculacion=projects/${CDP_PROJECT_ID}/topics/${TOPIC_VINCULACION}
+
+#JDBC properties
+jdbc.driver=org.postgresql.Driver
+jdbc.insert.query.boleta.cabeceras=insert into boletas.boleta_cabeceras (id_terminal_pos, numero_boleta, fecha_fin_transaccion, hora_fin_transaccion, id_tienda_origen, id_tienda_reconocimiento, id_tipo_transaccion, id_canal_de_venta, id_venta_catalogo_extendido_y_otro, id_vendedor, id_tienda_original, id_tipo_de_evento, id_cliente, id_terminal_pos_cancelacion, cuenta_empleado, monto_emitido, codigo_facturacion, referencia_folio_agencia_de_viajes, numero_evento, numero_boleta_cancelacion, monto_boleta, total_cancelacion, id_numero_centro_de_servicio, numero_paqueteria, leyenda_facturacion, codigo_de_barras, fecha_nacimiento_garantia_extendida, fecha_garantia_extemporanea, numero_indicador_marketplace, leyenda_tentativa, id_tipo_de_descuento_al_total, clave_homologada, id_direccion_fiscal, id_atg, id_mdm, id_tienda_origen_gcp, id_terminal_pos_gcp, id_vendedor_original, original_terminal, fecha_original_compra, numero_boleta_devolucion, nombre_vendedor, tipo_entrega, se_imprimio_ticket, confirmacion_tiempo_aire, email_donde_envio_ticket_electronico, error_id_cliente, indicador_de_borrado, id_atg_del_cliente, id_mdm_del_cliente ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) returning id_terminal_pos
+jdbc.insert.query.boleta.detalles.sku=insert into boletas.boleta_detalles_sku (id_linea_detalle, id_terminal_pos_boleta_cabeceras, numero_boleta_boleta_cabeceras, fecha_fin_transaccion_boleta_cabeceras, hora_fin_transaccion_boleta_cabeceras, id_tienda_origen_boleta_cabeceras, id_tienda_reconocimiento_boleta_cabeceras, id_sku, id_pep_r3, telefono_cliente_garantia_extendida, numero_orden_optica, orden_de_reparacion, numero_telefono_o_folio, numero_comanda_restaurant, numero_poliza, cantidad_articulos, precio_subtotal_neto, id_motivo_devolucion, id_seccion, precio_unitario_del_sku, fisico_o_virtual, es_marca_liverpool, indicador_tipo_precio, descripcion_descuento_sku, fecha_promesa_de_entrega_inicial, fecha_promesa_de_entrega_fin, seller_marketplace, error_id_sku, error_id_seccion ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) returning id_terminal_pos_boleta_cabeceras
+jdbc.insert.query.boleta.detalle.abonos.segmento=INSERT INTO boletas.boleta_detalle_abonos_segmento (id_linea_detalle_abonos_segmento,id_terminal_pos,numero_boleta,fecha_fin_transaccion,hora_fin_transaccion,id_tienda_origen,id_tienda_reconocimiento,id_segmento,importe_abonado_al_segmento) VALUES (?,?,?,?,?,?,?,?,?)
+jdbc.insert.query.boleta.detalle.cupones=INSERT INTO boletas.boleta_detalle_cupones (id_terminal_pos,numero_boleta,fecha_fin_transaccion,hora_fin_transaccion,id_tienda_origen,id_tienda_reconocimiento,codigo_cupon,es_redimido) VALUES (?,?,?,?,?,?,?,?)
+jdbc.insert.query.boleta.detalle.pagos=insert into boletas.boleta_detalle_pagos (id_linea_detalle_pagos, id_terminal_pos_boleta_cabeceras, numero_boleta_boleta_cabeceras, fecha_fin_transaccion_boleta_cabeceras, hora_fin_transaccion_boleta_cabeceras, id_tienda_origen_boleta_cabeceras, id_tienda_reconocimiento_boleta_cabeceras, id_medios_de_pago, monto_monedero, id_cliente_tarjeta, numero_autorizacion, numero_orden_soms, total_pagado_otromedio_o_cambio_en_efectivo, plan_de_credito, total_pagado_efectivo, hash_tarjeta_externa, numero_monedero, monto_redimido_monedero, saldo_anterior_monedero, monto_obtenido_monedero, saldo_actual_monedero, numero_de_cupon, id_modo_ingreso, banda_cheque, producto_bancario, descripcion_formapago, nombrecliente_tarjeta, monto_moneda_extranjera, folio_brightstar, telefono_codi, id_codigo_cancelacion, folio_promass, mascara_tarjeta ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+jdbc.insert.query.boleta.detalles.monedero=insert into boletas.boleta_detalles_monedero (id_terminal_pos, numero_boleta, fecha_fin_transaccion, hora_fin_transaccion, id_tienda_origen, id_tienda_reconocimiento, numero_monedero, saldo_anterior_monedero, monto_monedero, monto_obtenido_monedero, saldo_actual_monedero, monto_utilizado) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+jdbc.insert.query.boleta.detalles.sku.descuentos=insert into boletas.boleta_detalles_sku_descuentos (id_linea_detalle_boleta_detalles_sku, id_terminal_pos_boleta_detalles_sku, numero_boleta_boleta_detalles_sku, fecha_fin_transaccion_boleta_detalles_sku, hora_fin_transaccion_boleta_detalles_sku, id_tienda_origen_boleta_detalles_sku, id_tienda_reconocimiento_boleta_detalles_sku, id_descuento, total_descuento_sku, porcentaje_descuento_sku, descuento_sku_promocion, descripcion_descuento, id_linea_detalle) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+jdbc.insert.query.boleta.detalle.tarjetas.prepago=INSERT INTO boletas.boleta_detalle_tarjetas_prepago (id_terminal_pos,numero_boleta,fecha_fin_transaccion,hora_fin_transaccion,id_tienda_origen,id_tienda_reconocimiento,codigo_upc,importe_tarjeta_prepago) VALUES (?,?,?,?,?,?,?,?)
+jdbc.insert.query.boleta.detalle.abonos.tarjeta=insert into boletas.boleta_detalle_abono_tarjetas (id_linea_detalle, id_terminal_pos_boleta_cabeceras, numero_boleta_boleta_cabeceras, fecha_fin_transaccion_boleta_cabeceras, hora_fin_transaccion_boleta_cabeceras, id_tienda_origen_boleta_cabeceras, id_tienda_reconocimiento_boleta_cabeceras, numero_tarjeta, total_pagado, id_cliente_tarjeta, autorizacion_de_abono, cuenta_de_abono) values(?,?,?,?,?,?,?,?,?,?,?,?);
+
+
+#connection pool
+connection.pool.max.size=${CONNECTION_POOL_MAX_SIZE}
+connection.pool.min.idle=${CONNECTION_POOL_MIN_IDLE}
+connection.pool.timeout=${CONNECTION_POOL_TIMEOUT}
+connection.pool.idle.timeout=${CONNECTION_POOL_IDLE_TIMEOUT}
+connection.pool.max.lifetime=${CONNECTION_POOL_MAX_LIFETIME}
+connection.pool.min.evictable.time=${CONNECTION_POOL_MIN_EVICTABLE_TIME}
+connection.pool.soft.min.evictable.idle.time=${CONNECTION_POOL_SOFT_MIN_EVICTABLE_IDLE_TIME}
+
+#secret manager
+gcp.sm.jdbc.user=${DATABASE_USER}
+gcp.sm.jdbc.password=${DATABASE_PASSWORD}
+gcp.sm.jdbc.database=${DATABASE_NAME}
+gcp.sm.jdbc.instance.name=${DATABASE_INSTANCE_NAME}
+gcp.sm.jdbc.user.version=latest
+gcp.sm.jdbc.password.version=latest
+gcp.sm.jdbc.database.version=latest
+gcp.sm.jdbc.instance.name.version=latest
+jdbc.sm.url=jdbc:postgresql:///{database-name}
+
+#jdbc.sm.url=jdbc:postgresql://google/{database-name}?cloudSqlInstance={instance-name}&socketFactory=com.google.cloud.sql.postgres.SocketFactory&useSSL=false&ipTypes=PRIVATE

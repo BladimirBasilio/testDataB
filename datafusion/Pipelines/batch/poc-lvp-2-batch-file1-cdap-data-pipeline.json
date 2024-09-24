@@ -1,0 +1,148 @@
+{
+    "name": "poc-lvp-2-batch-file1",
+    "description": "Pipeline template for reusable pipelines",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "GCSFile",
+                "to": "Wrangler"
+            },
+            {
+                "from": "Wrangler",
+                "to": "Database CloudSQL output"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "GCSFile",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "GCSFile",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "filenameOnly": "false",
+                        "copyHeader": "true",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                        "path": "${input.pathfile}",
+                        "format": "text",
+                        "project": "mybigdataprojectmamp",
+                        "recursive": "false",
+                        "referenceName": "poc-lvp-2-input.archivos-csv",
+                        "skipHeader": "false",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "encrypted": "false",
+                        "fileEncoding": "UTF-8"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                "id": "GCSFile",
+                "type": "batchsource",
+                "label": "GCSFile",
+                "icon": "fa-plug"
+            },
+            {
+                "name": "Wrangler",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "Wrangler",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "7fe512b7-662b-4e0e-8bd8-8b53448ba61b",
+                        "directives": "parse-as-csv :body ',' true\ndrop :body",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"dato1\",\"type\":[\"int\",\"null\"]},{\"name\":\"dato2\",\"type\":[\"string\",\"null\"]},{\"name\":\"dato3\",\"type\":[\"string\",\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "on-error": "skip-error"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"dato1\",\"type\":[\"int\",\"null\"]},{\"name\":\"dato2\",\"type\":[\"string\",\"null\"]},{\"name\":\"dato3\",\"type\":[\"string\",\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "GCSFile",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "Wrangler",
+                "type": "transform",
+                "label": "Wrangler",
+                "icon": "icon-DataPreparation"
+            },
+            {
+                "name": "Database CloudSQL output",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "Database CloudSQL output",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "CloudSQL-output",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "jdbc:postgresql://google/test?cloudSqlInstance=mybigdataprojectmamp:us-central1:test-lvp-pg-3&socketFactory=com.google.cloud.sql.postgres.SocketFactory&useSSL=false",
+                        "tableName": "${target.table}",
+                        "columns": "${target.columns}",
+                        "user": "postgres",
+                        "password": "T1ng2D3Poll0",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "Wrangler",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"dato1\",\"type\":[\"int\",\"null\"]},{\"name\":\"dato2\",\"type\":[\"string\",\"null\"]},{\"name\":\"dato3\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "id": "Database-CloudSQL-output",
+                "type": "batchsink",
+                "label": "Database CloudSQL output",
+                "icon": "icon-database"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Pipeline template for reusable pipelines",
+        "maxConcurrentRuns": 1
+    }
+}

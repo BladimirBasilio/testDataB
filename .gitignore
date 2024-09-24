@@ -1,0 +1,95 @@
+# Created by https://www.gitignore.io/api/java,gradle
+
+### Java ###
+*.class
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+
+### Gradle ###
+.gradle
+/build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+# gradle/wrapper/gradle-wrapper.properties
+
+# End of https://www.gitignore.io/api/java,gradle
+
+../.DS_Store
+
+.gradle
+/build/
+/bin/
+.project
+.settings/
+.classpath
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+# gradle/wrapper/gradle-wrapper.properties
+
+target/
+.idea/
+.eclipse
+*.class
+#*.jar
+*.war
+*.ear
+*.logs
+*.iml
+
+.DS_Store
+
+template-api/build
+template-api/.idea
+template-api/.gradle
+
+.pytest_cache/
+__pycache__/
+
+**/*.properties
+
+dataflow/clientes/source/src/main/resources/*.properties
+dataflow/boletas/source/src/main/resources/*.properties
+dataflow/pedidos/source/src/main/resources/*.properties
+#resources/*.properties
+#src/main/resources/application-local.yaml
+#src/main/resources/application-local.yml
+#/dataflow/Pipelines/stream/fundacional/boletas/source/src/main/resources/
+
+dataflow/clientes/source/src/main/java/com/liverpool/stream/ingestion/fundacional/clientes/dataflow/RegistraClienteLPipeline.java
+dataflow/boletas/source/src/main/java/com/liverpool/stream/ingestion/fundacional/boletas/dataflow/RegistraBoletaLPipeline.java
+.yamllint
+dataflow/pedidos/source/src/main/java/com/liverpool/stream/ingestion/fundacional/pedidos/dataflow/RegistraPedidoLPipeline.java
+dataflow/pedidos/source/src/main/java/com/liverpool/stream/ingestion/fundacional/pedidos/dataflow/utils/CargaConfiguracionesLPipeline.java
+dataflow/pedidos/source/src/main/java/com/liverpool/stream/ingestion/fundacional/pedidos/dataflow/option/RegistraPedidoLOptions.java
+dataflow/clientes/source/src/main/java/com/liverpool/stream/ingestion/fundacional/clientes/dataflow/utils/CargaConfiguracionesLPipeline.java

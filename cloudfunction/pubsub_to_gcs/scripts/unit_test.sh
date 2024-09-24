@@ -1,0 +1,10 @@
+#!/bin/bash
+set -ex
+
+if [ -f requirements.txt ]; then
+  python3 -m pip install -r requirements.txt
+fi
+
+#do some testing
+echo "Testing Python App - if test run it here"
+#python3 -m unittest discover --verbose -p test_*.py

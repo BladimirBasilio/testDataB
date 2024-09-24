@@ -1,0 +1,60 @@
+#propiedades para ejecucion con directrunner
+#GCP properties
+gcp.projectId=${CDP_PROJECT_ID}
+
+# Dataflow properties
+gcp.df.registra.clientes.appName=${DATAFLOW_JOB_NAME}
+gcp.df.service.account=${SA_DATAFLOW_NAME}
+gcp.df.region=${REGION}
+gcp.df.temp=gs://${DATAFLOW_BUCKET_NAME}/temp
+gcp.df.staging=gs://${DATAFLOW_BUCKET_NAME}/staging
+gcp.df.maxWorkers=${DATAFLOW_MAX_WORKERS}
+gcp.df.usePublicIps=false
+gcp.df.network=https://www.googleapis.com/compute/v1/projects/${VPC_SHARED_PROJECT_ID}/global/networks/${VPC_SHARED_ID}
+gcp.df.subnetwork=https://www.googleapis.com/compute/v1/projects/${VPC_SHARED_PROJECT_ID}/regions/us-east4/subnetworks/${SUBNET_SHARED_ID}
+gcp.df.machineType=${INSTANCE_TYPE}
+#gcp.df.networkTags=use_network_tags=postgres-internal
+gcp.df.update=false
+gcp.df.diskSize=50
+
+# Pub/Sub properties
+gcp.pubsub.topic.registra.clientes=projects/${CDP_PROJECT_ID}/topics/${TOPIC_CLIENTE}
+gcp.pubsub.topic.subscription.registra.clientes=projects/${CDP_PROJECT_ID}/subscriptions/${SUB_TOPIC_CLIENTE}
+gcp.pubsub.topic.subscription.cliente.hash=projects/${CDP_PROJECT_ID}/topics/${TOPIC_HASH}
+
+#JDBC properties
+jdbc.driver=org.postgresql.Driver
+#jdbc.url=jdbc:postgresql://172.29.96.3:5432/cdp_v2_4_A
+jdbc.insert.query.clientes.clientes=SELECT * FROM clientes.am_clientes_crud  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+jdbc.insert.query.clientes.cliente.direcciones=SELECT * FROM clientes.am_cliente_direcciones_crud (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+jdbc.insert.query.clientes.cliente.emails.contacto=SELECT * FROM clientes.am_cliente_emails_de_contacto_crud (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+jdbc.insert.query.clientes.cliente.telefonos.contacto=SELECT * FROM clientes.am_cliente_telefonos_de_contacto_crud (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+jdbc.insert.query.clientes.cliente.formas.pago=SELECT * FROM clientes.am_cliente_formas_de_pago_crud (?,?,?,?,?,?,?,?,?,?,?,?)
+jdbc.insert.query.clientes.cliente.merge=INSERT INTO clientes.clientes_merge (id_cliente_unico, rowid, id_cliente, fuente, fecha_de_carga) VALUES (nextval('clientes.seq_clientes_merge_pk'),?,?,?,?)
+jdbc.insert.query.clientes.cliente.atg=select * from clientes.cliente_atg_crud(?,?,?,?,?,?,?,?,?,?,?,?,?)
+jdbc.insert.query.clientes.clientes.destinatario=SELECT * FROM clientes.am_cliente_destinatario_crud (?,?,?,?,?,?,?)
+jdbc.insert.query.clientes.cliente.ids=INSERT INTO clientes.cliente_ids (id_cliente_ids, fecha_creacion,id_origen, id_cliente, id_sistema_origen, fecha_actualizacion) VALUES (nextval('clientes.seq_cliente_ids_pk'),?,?,?,?,?)
+jdbc.insert.query.clientes.clientes.data_cliente_by_id_cliente_padre_del_destinatario = select id_cliente, primer_nombre, segundo_nombre, apellido_paterno, apellido_materno from clientes.clientes where id_cliente = ?;
+
+#connection pool
+connection.pool.max.size=${CONNECTION_POOL_MAX_SIZE}
+connection.pool.min.idle=${CONNECTION_POOL_MIN_IDLE}
+connection.pool.timeout=${CONNECTION_POOL_TIMEOUT}
+connection.pool.idle.timeout=${CONNECTION_POOL_IDLE_TIMEOUT}
+connection.pool.max.lifetime=${CONNECTION_POOL_MAX_LIFETIME}
+
+#secret manager
+gcp.sm.jdbc.user=${DATABASE_USER}
+gcp.sm.jdbc.password=${DATABASE_PASSWORD}
+gcp.sm.jdbc.database=${DATABASE_NAME}
+gcp.sm.jdbc.instance.name=${DATABASE_INSTANCE_NAME}
+gcp.sm.jdbc.user.version=latest
+gcp.sm.jdbc.password.version=latest
+gcp.sm.jdbc.database.version=latest
+gcp.sm.jdbc.instance.name.version=latest
+jdbc.sm.url=jdbc:postgresql:///{database-name}
+
+#jdbc.sm.url=jdbc:postgresql://google/{database-name}?cloudSqlInstance={instance-name}&socketFactory=com.google.cloud.sql.postgres.SocketFactory&useSSL=false&ipTypes=PRIVATE
+
+gcp.pubsub.topic.registra.cliente.insertado=projects/${CDP_PROJECT_ID}/topics/${TOPIC_INSERT_MYM}
+gcp.pubsub.topic.subscription.registra.cliente.insertado=projects/${CDP_PROJECT_ID}/subscriptions/${SUB_TOPIC_INSERT_MYM}

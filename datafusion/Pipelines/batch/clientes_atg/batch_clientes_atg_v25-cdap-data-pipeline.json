@@ -1,0 +1,253 @@
+{
+    "name": "batch_clientes_atg_v25",
+    "description": "Data Pipeline Application",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "input_clientes_atg",
+                "to": "w_clientes_atg"
+            },
+            {
+                "from": "w_clientes_atg",
+                "to": "tmp_insert"
+            },
+            {
+                "from": "w_clientes_atg",
+                "to": "ErrorCollector"
+            },
+            {
+                "from": "tmp_insert",
+                "to": "insert_in_actual_tables"
+            },
+            {
+                "from": "ErrorCollector",
+                "to": "ErrorFile"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "input_clientes_atg",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "input_clientes_atg",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "filenameOnly": "false",
+                        "copyHeader": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                        "path": "${input_uri}",
+                        "format": "text",
+                        "project": "auto-detect",
+                        "recursive": "false",
+                        "referenceName": "data-fusion.atg_clientes.dat",
+                        "skipHeader": "false",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "encrypted": "false",
+                        "fileEncoding": "UTF-8"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "input_clientes_atg"
+            },
+            {
+                "name": "w_clientes_atg",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "w_clientes_atg",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "42dca147-69c5-4b2e-bfd7-6009f43b03c1",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_3,body_2,body_5,body_6,body_8,body_9,body_12,body_11,body_14,body_15,body_17,body_18,body_20,body_21,body_23,body_24,body_26,body_27,body_29,body_30,body_32,body_33,body_35,body_36,body_38,body_39,body_42,body_41,body_44,body_45,body_47,body_48,body_51,body_50,body_53,body_54,body_56,body_57,body_59,body_60,body_62,body_63,body_65,body_66,body_68,body_69,body_71,body_72,body_74,body_75,body_77,body_78,body_81,body_80,body_83,body_84,body_86,body_87,body_89,body_90,body_92,body_93,body_95,body_96,body_98,body_99\nset-type :body_52 integer\nset-type :body_52 string\nsplit-to-columns body_7 \\s+\ndrop :body_7\nrename body_4 id_atg\nrename body_1 sistema_fuente_atg\nrename body_10 apellido_paterno\nrename body_13 apellido_materno\nrename body_16 genero\nrename body_19 fecha_de_nacimiento\nrename body_22 rfc\nrename body_25 fecha_de_registro\nrename body_28 email_cuentas\nrename body_31 email_notificaciones\nrename body_34 telefono_alias_casa\nrename body_37 telefono_alias_celular\nrename body_40 telefono_alias_trabajo\nrename body_43 telefono_alias_adicional\nrename body_49 calle\nrename body_52 numero_exterior\nrename body_55 numero_interior\nrename body_58 edificio\nrename body_61 id_estado_del_pais\nrename body_64 id_municipio\nrename body_67 id_colonia\nrename body_70 codigo_postal\nrename body_73 alias_de_direccion\nrename body_76 hash_1\nrename body_79 id_tipo_tarjeta\nrename body_82 realm_id\nrename body_85 id_facebook\nrename body_88 id_apple\nrename body_91 id_sistema_operativo_dispositivo\nrename body_94 baja_de_tarjeta\nrename body_97 alta_de_tarjeta\nrename body_100 baja_domicilio\nrename body_7_1 primer_nombre\nrename body_7_2 segundo_nombre\nrename email_cuentas email_tipo_cuentas\nrename email_notificaciones email_tonotificaciones\nrename email_tonotificaciones email_tipo_notificaciones\nrename telefono_alias_casa telefono_alias_telefono_casa\nrename telefono_alias_celular telefono_alias_telefono_celular\nrename telefono_alias_trabajo telefono_alias_telefono_trabajo\nrename telefono_alias_adicional telefono_alias_telefono_adicional\nrename body_46 id_tipo_direccion_cliente",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"sistema_fuente_atg\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_atg\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno\",\"type\":[\"string\",\"null\"]},{\"name\":\"genero\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_nacimiento\",\"type\":[\"string\",\"null\"]},{\"name\":\"rfc\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_registro\",\"type\":[\"string\",\"null\"]},{\"name\":\"email_tipo_cuentas\",\"type\":[\"string\",\"null\"]},{\"name\":\"email_tipo_notificaciones\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_casa\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_celular\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_trabajo\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_adicional\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_direccion_cliente\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_exterior\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_interior\",\"type\":[\"string\",\"null\"]},{\"name\":\"edificio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_estado_del_pais\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal\",\"type\":[\"string\",\"null\"]},{\"name\":\"alias_de_direccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"hash_1\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"realm_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_facebook\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_apple\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_sistema_operativo_dispositivo\",\"type\":[\"string\",\"null\"]},{\"name\":\"baja_de_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"alta_de_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"baja_domicilio\",\"type\":[\"string\",\"null\"]},{\"name\":\"primer_nombre\",\"type\":[\"string\",\"null\"]},{\"name\":\"segundo_nombre\",\"type\":[\"string\",\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "on-error": "skip-error"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"sistema_fuente_atg\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_atg\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno\",\"type\":[\"string\",\"null\"]},{\"name\":\"genero\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_nacimiento\",\"type\":[\"string\",\"null\"]},{\"name\":\"rfc\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_registro\",\"type\":[\"string\",\"null\"]},{\"name\":\"email_tipo_cuentas\",\"type\":[\"string\",\"null\"]},{\"name\":\"email_tipo_notificaciones\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_casa\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_celular\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_trabajo\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_adicional\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_direccion_cliente\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_exterior\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_interior\",\"type\":[\"string\",\"null\"]},{\"name\":\"edificio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_estado_del_pais\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal\",\"type\":[\"string\",\"null\"]},{\"name\":\"alias_de_direccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"hash_1\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"realm_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_facebook\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_apple\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_sistema_operativo_dispositivo\",\"type\":[\"string\",\"null\"]},{\"name\":\"baja_de_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"alta_de_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"baja_domicilio\",\"type\":[\"string\",\"null\"]},{\"name\":\"primer_nombre\",\"type\":[\"string\",\"null\"]},{\"name\":\"segundo_nombre\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "input_clientes_atg",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "w_clientes_atg"
+            },
+            {
+                "name": "tmp_insert",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "tmp_insert",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "ingest_clientes_atg",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "clientes_atg",
+                        "columns": "sistema_fuente_atg, id_atg,primer_nombre,segundo_nombre,apellido_paterno,apellido_materno,genero,fecha_de_nacimiento,rfc,fecha_de_registro,email_tipo_cuentas,email_tipo_notificaciones,telefono_alias_telefono_casa,telefono_alias_telefono_celular,telefono_alias_telefono_trabajo,telefono_alias_telefono_adicional,id_tipo_direccion_cliente,calle,numero_exterior,numero_interior,edificio,id_estado_del_pais,id_municipio,id_colonia,codigo_postal,alias_de_direccion,hash_1,id_tipo_tarjeta,realm_id,id_facebook,id_apple,id_sistema_operativo_dispositivo,baja_de_tarjeta,alta_de_tarjeta,baja_domicilio",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"sistema_fuente_atg\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_atg\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno\",\"type\":[\"string\",\"null\"]},{\"name\":\"genero\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_nacimiento\",\"type\":[\"string\",\"null\"]},{\"name\":\"rfc\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_registro\",\"type\":[\"string\",\"null\"]},{\"name\":\"email_tipo_cuentas\",\"type\":[\"string\",\"null\"]},{\"name\":\"email_tipo_notificaciones\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_casa\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_celular\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_trabajo\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_adicional\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_direccion_cliente\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_exterior\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_interior\",\"type\":[\"string\",\"null\"]},{\"name\":\"edificio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_estado_del_pais\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal\",\"type\":[\"string\",\"null\"]},{\"name\":\"alias_de_direccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"hash_1\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"realm_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_facebook\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_apple\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_sistema_operativo_dispositivo\",\"type\":[\"string\",\"null\"]},{\"name\":\"baja_de_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"alta_de_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"baja_domicilio\",\"type\":[\"string\",\"null\"]},{\"name\":\"primer_nombre\",\"type\":[\"string\",\"null\"]},{\"name\":\"segundo_nombre\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "w_clientes_atg",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"sistema_fuente_atg\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_atg\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno\",\"type\":[\"string\",\"null\"]},{\"name\":\"genero\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_nacimiento\",\"type\":[\"string\",\"null\"]},{\"name\":\"rfc\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_registro\",\"type\":[\"string\",\"null\"]},{\"name\":\"email_tipo_cuentas\",\"type\":[\"string\",\"null\"]},{\"name\":\"email_tipo_notificaciones\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_casa\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_celular\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_trabajo\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_alias_telefono_adicional\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_direccion_cliente\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_exterior\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_interior\",\"type\":[\"string\",\"null\"]},{\"name\":\"edificio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_estado_del_pais\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal\",\"type\":[\"string\",\"null\"]},{\"name\":\"alias_de_direccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"hash_1\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"realm_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_facebook\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_apple\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_sistema_operativo_dispositivo\",\"type\":[\"string\",\"null\"]},{\"name\":\"baja_de_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"alta_de_tarjeta\",\"type\":[\"string\",\"null\"]},{\"name\":\"baja_domicilio\",\"type\":[\"string\",\"null\"]},{\"name\":\"primer_nombre\",\"type\":[\"string\",\"null\"]},{\"name\":\"segundo_nombre\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "id": "tmp_insert"
+            },
+            {
+                "name": "ErrorCollector",
+                "plugin": {
+                    "name": "ErrorCollector",
+                    "type": "errortransform",
+                    "label": "ErrorCollector",
+                    "artifact": {
+                        "name": "core-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "messageField": "msg",
+                        "codeField": "code",
+                        "stageField": "node"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody"
+                    }
+                ],
+                "id": "ErrorCollector"
+            },
+            {
+                "name": "insert_in_actual_tables",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "insert_in_actual_tables",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH cl_atg_tmp AS (\n\tSELECT * FROM staging.clientes_atg\n), colonias AS (\n\tINSERT INTO shared.CATALOGOS (ID_CATALOGO, ENTIDAD_ORIGEN,CLAVE_HOMOLOGADA, DESCRIPCION_CATALOGO, ESQUEMA,ESTA_BORRADO)\n\tSELECT \tDISTINCT nextval('shared.seq_catalogos_pk'),  'COLONIAS', ID_COLONIA, ID_COLONIA, 'SHARED', 'N' \n\tFROM cl_atg_tmp\n\tON CONFLICT DO NOTHING\n), municipios AS (\n\tINSERT INTO shared.CATALOGOS (ID_CATALOGO, ENTIDAD_ORIGEN,CLAVE_HOMOLOGADA,DESCRIPCION_CATALOGO, ESQUEMA,ESTA_BORRADO)\n\tSELECT DISTINCT nextval('shared.seq_catalogos_pk'), 'MUNICIPIOS' , ID_MUNICIPIO, ID_MUNICIPIO, 'SHARED', 'N'   \n\tFROM cl_atg_tmp\n\tON CONFLICT DO NOTHING\n), estados_del_pais AS (\n\tINSERT INTO shared.CATALOGOS (ID_CATALOGO, ENTIDAD_ORIGEN,CLAVE_HOMOLOGADA,DESCRIPCION_CATALOGO, ESQUEMA,ESTA_BORRADO)\n\tSELECT DISTINCT nextval('shared.seq_catalogos_pk'), 'ESTADOS_DEL_PAIS' ,ID_ESTADO_DEL_PAIS, ID_ESTADO_DEL_PAIS, 'SHARED','N'  \n\tFROM cl_atg_tmp\n\tON CONFLICT DO NOTHING\n), catalogs AS (\n\tselect id_catalogo, entidad_origen, esta_borrado, clave_homologada, descripcion_catalogo from shared.catalogos where ENTIDAD_ORIGEN='SISTEMAS_DE_ORIGEN' and clave_homologada='ATG'\n), cl AS (\n\tINSERT INTO clientes.clientes (\n\t\tid_cliente, PRIMER_NOMBRE,SEGUNDO_NOMBRE,APELLIDO_PATERNO,APELLIDO_MATERNO,GENERO,FECHA_DE_NACIMIENTO,RFC,FECHA_DE_REGISTRO, clave_homologada, id_sistema_origen)\n\tSELECT DISTINCT\n\t\tnextval('clientes.seq_clientes_pk'), cl_atg_tmp.primer_nombre, cl_atg_tmp.SEGUNDO_NOMBRE,\n\t\tcl_atg_tmp.APELLIDO_PATERNO, cl_atg_tmp.APELLIDO_MATERNO, cl_atg_tmp.genero, TO_DATE(cl_atg_tmp.FECHA_DE_NACIMIENTO,'YYYY-MM-DD'), cl_atg_tmp.RFC, TO_DATE(cl_atg_tmp.FECHA_DE_REGISTRO,'YYYY-MM-DD'),\n\t\tcl_atg_tmp.ID_ATG, catalogs.id_catalogo\n\tFROM\n\t\tcl_atg_tmp, catalogs\n\tON CONFLICT ON CONSTRAINT pk_clientes\n\tDO NOTHING\n\tRETURNING id_cliente, clave_homologada, id_sistema_origen\n), cl_atg AS (\n\tINSERT INTO clientes.cliente_atg (\n\t\tid_cliente, id_cliente_atg, SISTEMA_FUENTE_ATG,ID_ATG,HASH_1,ID_TIPO_TARJETA,REALM_ID,ID_FACEBOOK,ID_APPLE,BAJA_DE_TARJETA,ALTA_DE_TARJETA)\n\tSELECT DISTINCT\n\t\tcl.id_cliente, nextval('clientes.seq_cliente_atg_pk'), cl_atg_tmp.SISTEMA_FUENTE_ATG, cl_atg_tmp.ID_ATG, cl_atg_tmp.HASH_1, cl_atg_tmp.ID_TIPO_TARJETA,\n\t\tcl_atg_tmp.REALM_ID, cl_atg_tmp.ID_FACEBOOK, cl_atg_tmp.ID_APPLE, cl_atg_tmp.BAJA_DE_TARJETA, cl_atg_tmp.ALTA_DE_TARJETA\n\tFROM\n\t\tcl_atg_tmp\n\tINNER JOIN cl\n\tON cl_atg_tmp.id_atg = cl.clave_homologada\n\tINNER JOIN shared.catalogos catalogs\n\tON cl.id_sistema_origen = catalogs.id_catalogo\n\tRETURNING id_cliente, id_cliente_atg, SISTEMA_FUENTE_ATG,ID_ATG,HASH_1,ID_TIPO_TARJETA,REALM_ID,ID_FACEBOOK,ID_APPLE,BAJA_DE_TARJETA,ALTA_DE_TARJETA\n), cl_emails_cuentas AS (\n\tINSERT INTO clientes.cliente_emails_de_contacto (email, tipo, id_cliente_emails_de_contacto, id_cliente)\n\tSELECT DISTINCT\n\t\tcl_atg_tmp.email_tipo_cuentas, 'CUENTAS', nextval('clientes.seq_cliente_emails_de_contacto_pk'), cl.id_cliente \n\tFROM\n\t\tcl_atg_tmp\n\tINNER JOIN cl\n\tON cl_atg_tmp.id_atg = cl.clave_homologada\n\tINNER JOIN catalogs\n\tON cl.id_sistema_origen = catalogs.id_catalogo\n), cl_emails_notificaciones AS (\n\tINSERT INTO clientes.cliente_emails_de_contacto (email, tipo, id_cliente_emails_de_contacto, id_cliente)\n\tSELECT DISTINCT\n\t\tcl_atg_tmp.email_tipo_cuentas, 'NOTIFICACIONES', nextval('clientes.seq_cliente_emails_de_contacto_pk'), cl.id_cliente \n\tFROM\n\t\tcl_atg_tmp\n\tINNER JOIN cl\n\tON cl_atg_tmp.id_atg = cl.clave_homologada\n\tINNER JOIN catalogs\n\tON cl.id_sistema_origen = catalogs.id_catalogo\n), cl_telefonos_casa AS (\n\tINSERT INTO clientes.cliente_telefonos_de_contacto (telefono, alias_telefono, id_cliente_telefonos_de_contacto, id_cliente)\n\tSELECT DISTINCT\n\t\tcl_atg_tmp.telefono_alias_telefono_casa, 'CASA', nextval('clientes.seq_cliente_telefonos_de_contacto_pk'), cl.id_cliente \n\tFROM\n\t\tcl_atg_tmp\n\tINNER JOIN cl\n\tON cl_atg_tmp.id_atg = cl.clave_homologada\n\tINNER JOIN catalogs\n\tON cl.id_sistema_origen = catalogs.id_catalogo\n), cl_telefonos_celular AS (\n\tINSERT INTO clientes.cliente_telefonos_de_contacto (telefono, alias_telefono, id_cliente_telefonos_de_contacto, id_cliente)\n\tSELECT DISTINCT\n\t\tcl_atg_tmp.telefono_alias_telefono_celular, 'CELULAR', nextval('clientes.seq_cliente_telefonos_de_contacto_pk'), cl.id_cliente \n\tFROM\n\t\tcl_atg_tmp\n\tINNER JOIN cl\n\tON cl_atg_tmp.id_atg = cl.clave_homologada\n\tINNER JOIN catalogs\n\tON cl.id_sistema_origen = catalogs.id_catalogo\n), cl_telefonos_trabajo AS (\n\tINSERT INTO clientes.cliente_telefonos_de_contacto (telefono, alias_telefono, id_cliente_telefonos_de_contacto, id_cliente)\n\tSELECT DISTINCT\n\t\tcl_atg_tmp.telefono_alias_telefono_trabajo, 'TRABAJO', nextval('clientes.seq_cliente_telefonos_de_contacto_pk'), cl.id_cliente \n\tFROM\n\t\tcl_atg_tmp\n\tINNER JOIN cl\n\tON cl_atg_tmp.id_atg = cl.clave_homologada\n\tINNER JOIN catalogs\n\tON cl.id_sistema_origen = catalogs.id_catalogo\n), cl_telefonos_adicional AS (\n\tINSERT INTO clientes.cliente_telefonos_de_contacto (telefono, alias_telefono, id_cliente_telefonos_de_contacto, id_cliente)\n\tSELECT DISTINCT\n\t\tcl_atg_tmp.telefono_alias_telefono_adicional, 'ADICIONAL', nextval('clientes.seq_cliente_telefonos_de_contacto_pk'), cl.id_cliente \n\tFROM\n\t\tcl_atg_tmp\n\tINNER JOIN cl\n\tON cl_atg_tmp.id_atg = cl.clave_homologada\n\tINNER JOIN catalogs\n\tON cl.id_sistema_origen = catalogs.id_catalogo\n)\n\tINSERT INTO clientes.cliente_direcciones (CALLE, NUMERO_EXTERIOR, NUMERO_INTERIOR, EDIFICIO, ID_ESTADO_DEL_PAIS, ID_MUNICIPIO, ID_COLONIA, CODIGO_POSTAL, ALIAS_DE_DIRECCION, id_direccion_del_cliente, ID_CLIENTE, ID_TIPO_DIRECCION_CLIENTE, BAJA_DOMICILIO)\n\tSELECT DISTINCT\n\t\tcl_atg_tmp.calle,  cl_atg_tmp.numero_exterior, cl_atg_tmp.numero_interior, cl_atg_tmp.edificio, edo.id_catalogo, mpo.id_catalogo, col.id_catalogo, cl_atg_tmp.codigo_postal, cl_atg_tmp.alias_de_direccion, nextval('clientes.seq_cliente_direcciones_pk'), cl.id_cliente, tdir.ID_CATALOGO, cl_atg_tmp.BAJA_DOMICILIO \n\tFROM\n\t\tshared.catalogos tdir, cl_atg_tmp \n\tINNER JOIN cl ON cl_atg_tmp.id_atg = cl.clave_homologada\n\tINNER JOIN shared.catalogos edo ON edo.descripcion_catalogo = cl_atg_tmp.ID_ESTADO_DEL_PAIS\n\tINNER JOIN shared.catalogos catalogs\tON cl.id_sistema_origen = catalogs.id_catalogo\n\tINNER JOIN shared.catalogos mpo ON mpo.descripcion_catalogo = cl_atg_tmp.ID_MUNICIPIO\n\tINNER JOIN shared.catalogos col ON col.descripcion_catalogo = cl_atg_tmp.ID_COLONIA\n\twhere (tdir.ENTIDAD_ORIGEN='TIPO_DIRECCION'\tAND tdir.ESTA_BORRADO='N' AND tdir.clave_homologada = cl_atg_tmp.ID_TIPO_DIRECCION_CLIENTE) and \n\t(edo.ENTIDAD_ORIGEN='ESTADOS_DEL_PAIS' AND edo.ESTA_BORRADO='N') and\n\t(mpo.ENTIDAD_ORIGEN='MUNICIPIOS' AND mpo.ESTA_BORRADO='N') and\n\t(col.ENTIDAD_ORIGEN='COLONIAS' AND col.ESTA_BORRADO='N') ",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "enableAutoCommit": "false",
+                        "connectionArguments": "currentSchema=clientes"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "insert_in_actual_tables"
+            },
+            {
+                "name": "ErrorFile",
+                "plugin": {
+                    "name": "GCS",
+                    "type": "batchsink",
+                    "label": "ErrorFile",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "clientes-atg-error",
+                        "project": "auto-detect",
+                        "path": "${error_uri}",
+                        "suffix": "yyyy-MM-dd-HH-mm",
+                        "format": "csv",
+                        "delimiter": ",",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "location": "us"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "ErrorCollector",
+                        "schema": ""
+                    }
+                ],
+                "id": "ErrorFile"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Data Pipeline Application",
+        "maxConcurrentRuns": 1
+    }
+}

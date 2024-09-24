@@ -1,0 +1,261 @@
+{
+    "name": "batch_clientes_tarjetas_v25",
+    "description": "Data Pipeline Application",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "input_cu_tarjetas",
+                "to": "w_forma_de_pago"
+            },
+            {
+                "from": "w_forma_de_pago",
+                "to": "insert_in_tmp_table"
+            },
+            {
+                "from": "w_forma_de_pago",
+                "to": "ErrorCollector"
+            },
+            {
+                "from": "insert_in_tmp_table",
+                "to": "insert_in_actual_table"
+            },
+            {
+                "from": "ErrorCollector",
+                "to": "ErrorFile"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "input_cu_tarjetas",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "input_cu_tarjetas",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "filenameOnly": "false",
+                        "copyHeader": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                        "path": "${input_uri}",
+                        "format": "text",
+                        "project": "auto-detect",
+                        "recursive": "false",
+                        "referenceName": "data-fusion.CDP_DWH_INB_CU_TARJETAS.dat",
+                        "skipHeader": "false",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "encrypted": "false",
+                        "fileEncoding": "UTF-8"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "input_cu_tarjetas"
+            },
+            {
+                "name": "w_forma_de_pago",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "w_forma_de_pago",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "4ac588ad-a012-4881-9819-bd474125f134",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12\nrename body_1 NUMERO_TARJETA_CLIENTE\nrename body_4 ROWID\nrename body_7 SISTEMA_FUENTE\nrename body_10 BIN_TARJETA\nrename body_13 HASH_TARJETA_EXTERNA",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"NUMERO_TARJETA_CLIENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"ROWID\",\"type\":[\"string\",\"null\"]},{\"name\":\"SISTEMA_FUENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"BIN_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA_EXTERNA\",\"type\":[\"string\",\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "on-error": "skip-error"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"NUMERO_TARJETA_CLIENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"ROWID\",\"type\":[\"string\",\"null\"]},{\"name\":\"SISTEMA_FUENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"BIN_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA_EXTERNA\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "input_cu_tarjetas",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "w_forma_de_pago"
+            },
+            {
+                "name": "insert_in_tmp_table",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "insert_in_tmp_table",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "ingest_staging_cliente_formas_de_pago",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "cliente_formas_de_pago",
+                        "columns": "NUMERO_TARJETA_CLIENTE,ROWID,SISTEMA_FUENTE,BIN_TARJETA,HASH_TARJETA_EXTERNA",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"NUMERO_TARJETA_CLIENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"ROWID\",\"type\":[\"string\",\"null\"]},{\"name\":\"SISTEMA_FUENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"BIN_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA_EXTERNA\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "w_forma_de_pago",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"NUMERO_TARJETA_CLIENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"ROWID\",\"type\":[\"string\",\"null\"]},{\"name\":\"SISTEMA_FUENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"BIN_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA_EXTERNA\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "id": "insert_in_tmp_table"
+            },
+            {
+                "name": "ErrorCollector",
+                "plugin": {
+                    "name": "ErrorCollector",
+                    "type": "errortransform",
+                    "label": "ErrorCollector",
+                    "artifact": {
+                        "name": "core-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "messageField": "msg",
+                        "codeField": "code",
+                        "stageField": "node"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "w_forma_de_pago",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "ErrorCollector"
+            },
+            {
+                "name": "insert_in_actual_table",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "insert_in_actual_table",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH forma_de_pago_tmp AS (\n\tSELECT * FROM staging.cliente_formas_de_pago\n), cl_forma_de_pago AS (\n\tINSERT INTO clientes.cliente_formas_de_pago (id_cliente_tarjeta, numero_tarjeta_cliente, sistema_fuente, bin_tarjeta, hash_tarjeta_externa, id_cliente)\n\tSELECT nextval('clientes.seq_cliente_formas_de_pago_pk'), forma_de_pago_tmp.numero_tarjeta_cliente, \n\tforma_de_pago_tmp.sistema_fuente, forma_de_pago_tmp.bin_tarjeta, forma_de_pago_tmp.hash_tarjeta_externa,\n\tcl.id_cliente\n\tFROM forma_de_pago_tmp\n\tINNER JOIN clientes.clientes cl ON forma_de_pago_tmp.rowid = cl.row_id\n)\nINSERT INTO clientes.clientes_merge (id_cliente_unico, rowid, id_cliente)\nSELECT DISTINCT nextval('clientes.seq_clientes_merge_pk'), forma_de_pago_tmp.rowid, cl.id_cliente\nFROM forma_de_pago_tmp\nINNER JOIN clientes.clientes cl ON forma_de_pago_tmp.rowid = cl.row_id",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=clientes",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "insert_in_actual_table"
+            },
+            {
+                "name": "ErrorFile",
+                "plugin": {
+                    "name": "GCS",
+                    "type": "batchsink",
+                    "label": "ErrorFile",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "clientes-tarjetas-error",
+                        "project": "auto-detect",
+                        "path": "${error_uri}",
+                        "suffix": "yyyy-MM-dd-HH-mm",
+                        "format": "csv",
+                        "delimiter": ",",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "location": "us",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "ErrorCollector",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "ErrorFile"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Data Pipeline Application",
+        "maxConcurrentRuns": 1
+    }
+}

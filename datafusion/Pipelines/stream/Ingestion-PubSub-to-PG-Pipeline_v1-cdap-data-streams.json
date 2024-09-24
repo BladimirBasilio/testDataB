@@ -1,0 +1,155 @@
+{
+    "name": "Ingestion-PubSub-Pipeline_v1",
+    "description": "This is the template for pub sub ingestion. Configuration file must be configured for indicate\n- subscription topic\n- transformations in wrangler\n- database configurations",
+    "artifact": {
+        "name": "cdap-data-streams",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "Pub/Sub",
+                "to": "Wrangler"
+            },
+            {
+                "from": "Wrangler",
+                "to": "CloudSQL PostgreSQL"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {
+            "system.spark.spark.streaming.backpressure.enabled": "true"
+        },
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "Pub/Sub",
+                "plugin": {
+                    "name": "GoogleSubscriber",
+                    "type": "streamingsource",
+                    "label": "Pub/Sub",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "PubSub-input",
+                        "project": "auto-detect",
+                        "subscription": "test-lvp-ps-2-consume",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"etlSchemaBody\",\"type\":\"record\",\"fields\":[{\"name\":\"message\",\"type\":\"bytes\"},{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"timestamp\",\"type\":{\"logicalType\":\"timestamp-micros\",\"type\":\"long\"}},{\"name\":\"attributes\",\"type\":{\"keys\":\"string\",\"values\":\"string\",\"type\":\"map\"}}]}"
+                    }
+                ],
+                "id": "Pub-Sub",
+                "type": "streamingsource",
+                "label": "Pub/Sub",
+                "icon": "fa-plug"
+            },
+            {
+                "name": "Wrangler",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "Wrangler",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "77cc1f14045799acc3afcb0a2f8d98da",
+                        "directives": "keep :message\nset-charset :message 'utf-8'\nrename :message :body\nparse-as-json :body 1\nrename body body_payload\nparse-as-json :body_payload 1\nrename body_payload_guestName guestName\nrename body_payload_content content",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"guestname\",\"type\":[\"string\",\"null\"]},{\"name\":\"content\",\"type\":[\"string\",\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "on-error": "skip-error"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"guestname\",\"type\":[\"string\",\"null\"]},{\"name\":\"content\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "Pub/Sub",
+                        "schema": "{\"name\":\"etlSchemaBody\",\"type\":\"record\",\"fields\":[{\"name\":\"message\",\"type\":\"bytes\"},{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"timestamp\",\"type\":{\"logicalType\":\"timestamp-micros\",\"type\":\"long\"}},{\"name\":\"attributes\",\"type\":{\"keys\":\"string\",\"values\":\"string\",\"type\":\"map\"}}]}"
+                    }
+                ],
+                "id": "Wrangler",
+                "type": "transform",
+                "label": "Wrangler",
+                "icon": "icon-DataPreparation"
+            },
+            {
+                "name": "CloudSQL PostgreSQL",
+                "plugin": {
+                    "name": "CloudSQLPostgreSQL",
+                    "type": "batchsink",
+                    "label": "CloudSQL PostgreSQL",
+                    "artifact": {
+                        "name": "cloudsql-postgresql-plugin",
+                        "version": "1.5.0",
+                        "scope": "USER"
+                    },
+                    "properties": {
+                        "referenceName": "CloudSQL-output",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "database": "guestbook",
+                        "user": "postgres",
+                        "password": "T1ng2D3Poll0",
+                        "instanceType": "public",
+                        "connectionName": "mybigdataprojectmamp:us-central1:test-lvp-pg-2",
+                        "tableName": "entries",
+                        "transactionIsolationLevel": "TRANSACTION_READ_COMMITTED",
+                        "connectionTimeout": "10"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"guestName\",\"type\":[\"string\",\"null\"]},{\"name\":\"content\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "Wrangler",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"guestname\",\"type\":[\"string\",\"null\"]},{\"name\":\"content\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "id": "CloudSQL-PostgreSQL",
+                "type": "batchsink",
+                "label": "CloudSQL PostgreSQL",
+                "icon": "fa-plug"
+            }
+        ],
+        "batchInterval": "10s",
+        "clientResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "disableCheckpoints": false,
+        "checkpointDir": "gs://df-10774383272821262064-vq223lk44ei6xcudaizbbqaaaa/checkpoints/",
+        "stopGracefully": true,
+        "description": "This is the template for pub sub ingestion. Configuration file must be configured for indicate\n- subscription topic\n- transformations in wrangler\n- database configurations"
+    }
+}

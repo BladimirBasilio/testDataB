@@ -1,0 +1,260 @@
+{
+    "name": "batch_cifra_control_boletas_v25",
+    "description": "Data Pipeline Application",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "input_cifra_control_boletas",
+                "to": "w_cifra_control"
+            },
+            {
+                "from": "w_cifra_control",
+                "to": "tmp_insert"
+            },
+            {
+                "from": "w_cifra_control",
+                "to": "ErrorCollector"
+            },
+            {
+                "from": "tmp_insert",
+                "to": "insert_in_actual_table"
+            },
+            {
+                "from": "ErrorCollector",
+                "to": "ErrorFile"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "input_cifra_control_boletas",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "input_cifra_control_boletas",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "data-fusion-ilan.tbc0001.txt",
+                        "project": "auto-detect",
+                        "path": "${input_uri}",
+                        "format": "text",
+                        "skipHeader": "false",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "filenameOnly": "false",
+                        "recursive": "false",
+                        "encrypted": "false",
+                        "fileEncoding": "UTF-8",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "input_cifra_control_boletas"
+            },
+            {
+                "name": "w_cifra_control",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "w_cifra_control",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|' false\ndrop :body\nrename body_1 fecha_tlog\nrename body_2 centro\nrename body_3 id_tipo_de_transaccion\nrename body_4 tipo_de_transaccion\nrename body_5 total_de_las_transacciones\nset-type :id_tipo_de_transaccion long\nset-type :total_de_las_transacciones long\nset-type :id_tipo_de_transaccion integer\nfind-and-replace FECHA_TLOG s/^20180118$/2018-01-18/g\nparse-as-simple-date :fecha_tlog yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"fecha_tlog\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"centro\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_de_transaccion\",\"type\":[\"int\",\"null\"]},{\"name\":\"tipo_de_transaccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"total_de_las_transacciones\",\"type\":[\"long\",\"null\"]}]}",
+                        "workspaceId": "8f50df64-dc28-45d8-902f-4665b45ef6b8"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"fecha_tlog\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"centro\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_de_transaccion\",\"type\":[\"int\",\"null\"]},{\"name\":\"tipo_de_transaccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"total_de_las_transacciones\",\"type\":[\"long\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "input_cifra_control_boletas",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "w_cifra_control"
+            },
+            {
+                "name": "tmp_insert",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "tmp_insert",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "ingestion_cifra_control_boletas",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "boletas_cifra_de_control_tmp",
+                        "columns": "fecha_tlog,centro,id_tipo_de_transaccion,tipo_de_transaccion,total_de_las_transacciones",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"fecha_tlog\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"centro\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_de_transaccion\",\"type\":[\"int\",\"null\"]},{\"name\":\"tipo_de_transaccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"total_de_las_transacciones\",\"type\":[\"long\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "w_cifra_control",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"fecha_tlog\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"centro\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_de_transaccion\",\"type\":[\"int\",\"null\"]},{\"name\":\"tipo_de_transaccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"total_de_las_transacciones\",\"type\":[\"long\",\"null\"]}]}"
+                    }
+                ],
+                "id": "tmp_insert"
+            },
+            {
+                "name": "ErrorCollector",
+                "plugin": {
+                    "name": "ErrorCollector",
+                    "type": "errortransform",
+                    "label": "ErrorCollector",
+                    "artifact": {
+                        "name": "core-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "messageField": "msg",
+                        "codeField": "code",
+                        "stageField": "node"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"errorfileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "w_cifra_control",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "ErrorCollector"
+            },
+            {
+                "name": "insert_in_actual_table",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "insert_in_actual_table",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH boletas_cifra_tmp AS (\n\tSELECT *\n\tFROM staging.boletas_cifra_de_control_tmp\n)\nINSERT INTO boletas.boletas_cifra_de_control (id_boletas_cifra_de_control, fecha_tlog,centro,id_tipo_de_transaccion,tipo_de_transaccion,total_de_las_transacciones)\nSELECT DISTINCT nextval('boletas.seq_boletas_cifra_de_control_pk'), boletas_cifra_tmp.fecha_tlog, boletas_cifra_tmp.centro, boletas_cifra_tmp.id_tipo_de_transaccion, boletas_cifra_tmp.tipo_de_transaccion,boletas_cifra_tmp.total_de_las_transacciones\nFROM boletas_cifra_tmp",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=boletas",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "insert_in_actual_table"
+            },
+            {
+                "name": "ErrorFile",
+                "plugin": {
+                    "name": "GCS",
+                    "type": "batchsink",
+                    "label": "ErrorFile",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "cifra-control-boletas-error",
+                        "project": "auto-detect",
+                        "path": "${error_uri}",
+                        "suffix": "yyyy-MM-dd-HH-mm",
+                        "format": "csv",
+                        "delimiter": ",",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "location": "us",
+                        "schema": "{\"type\":\"record\",\"name\":\"errorfileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"errorfileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "ErrorCollector",
+                        "schema": "{\"type\":\"record\",\"name\":\"errorfileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "ErrorFile"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Data Pipeline Application",
+        "maxConcurrentRuns": 1
+    }
+}

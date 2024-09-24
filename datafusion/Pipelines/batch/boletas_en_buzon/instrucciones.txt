@@ -1,0 +1,15 @@
+Orden:
+1) CDP_DWH_INB_BOLETAS_MOTIVO_DEV_02092021.dat (es un catálogo)
+2) CDP_DWH_INB_BOLETAS_TIPO_TSX_02092021.dat (otro catálogo)
+3) CDP_DWH_INB_BOLETAS_SKU_02092021.dat
+4) CDP_DWH_INB_BOLETAS_FORMA_PAGO_02092021.dat
+
+
+Observaciones:
+En la tabla boletas en buzón (filas 13 y 14 mapping), están los campos ID_TIPO_TRANSACCION y ESTADO_TRANSACCION.
+la combinación de esos dos campos.. te dicen que tipo de transacción es.
+Para ello sirve la interfaz de tipo tsx (filas 104 a 108).
+Si te das cuenta, viene el mismo tipo de transacción, y su descripción, y luego el status y su descripción.
+Y lo que te dice qué operación es, es el último campo de ID_OPERACION.
+
+

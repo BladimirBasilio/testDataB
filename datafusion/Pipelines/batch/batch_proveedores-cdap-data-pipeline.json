@@ -1,0 +1,217 @@
+{
+    "name": "batch_proveedores",
+    "description": "Pipeline batch - ingesta de proveedores",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "Proveedores",
+                "to": "Wrangler"
+            },
+            {
+                "from": "Wrangler",
+                "to": "DBLoad"
+            },
+            {
+                "from": "Wrangler",
+                "to": "ErrorCollector"
+            },
+            {
+                "from": "ErrorCollector",
+                "to": "GCSError"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "Proveedores",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "Proveedores",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "filenameOnly": "false",
+                        "copyHeader": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                        "path": "${input_uri}",
+                        "format": "text",
+                        "project": "lvp-cdp",
+                        "recursive": "false",
+                        "referenceName": "gcs-cdp-producto.CDP_DWH_INB_PROV.dat",
+                        "skipHeader": "false",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "encrypted": "false",
+                        "fileEncoding": "UTF-8"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                "id": "Proveedores"
+            },
+            {
+                "name": "Wrangler",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "Wrangler",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "6ddb74ec-7aae-424f-b226-81597857d3cd",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15,body_17,body_18,body_20,body_21,body_23,body_24,body_26,body_27\ntrim body_1\ntrim body_4\ntrim body_7\ntrim body_10\ntrim body_13\ntrim body_16\ntrim body_19\ntrim body_22\ntrim body_25\ntrim body_28\nrename body_1 id_proveedor\nrename body_4 nombre_proveedor\nrename body_7 clave_homologada\nrename body_10 fecha_ingreso\nrename body_13 referencia\nrename body_16 clave_stt\nrename body_19 tipo_proveedor\nrename body_22 fecha_alta_en_sap\nrename body_25 clase\nrename body_28 fecha_actualizacion\nset-type :id_proveedor integer\nparse-as-simple-date :fecha_ingreso yyyy-MM-dd\nparse-as-simple-date :fecha_alta_en_sap yyyy-MM-dd\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"id_proveedor\",\"type\":[\"int\",\"null\"]},{\"name\":\"nombre_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_ingreso\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_stt\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_alta_en_sap\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"clase\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "on-error": "fail-pipeline"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"id_proveedor\",\"type\":[\"int\",\"null\"]},{\"name\":\"nombre_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_ingreso\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_stt\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_alta_en_sap\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"clase\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "Proveedores",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "Wrangler"
+            },
+            {
+                "name": "DBLoad",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "DBLoad",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-proveedores",
+                        "jdbcPluginName": "postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "proveedores",
+                        "columns": "id_proveedor, nombre_proveedor, clave_homologada, fecha_ingreso, referencia, clave_stt, tipo_proveedor, fecha_alta_en_sap, clase, fecha_actualizacion",
+                        "user": "${secure(db_username)}",
+                        "password": "${secure(db_password)}",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE",
+                        "connectionArguments": "currentSchema=shared"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"id_proveedor\",\"type\":[\"int\",\"null\"]},{\"name\":\"nombre_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_ingreso\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_stt\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_alta_en_sap\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"clase\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "Wrangler",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"id_proveedor\",\"type\":[\"int\",\"null\"]},{\"name\":\"nombre_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_ingreso\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_stt\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_alta_en_sap\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"clase\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "DBLoad"
+            },
+            {
+                "name": "ErrorCollector",
+                "plugin": {
+                    "name": "ErrorCollector",
+                    "type": "errortransform",
+                    "label": "ErrorCollector",
+                    "artifact": {
+                        "name": "core-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "messageField": "msg",
+                        "codeField": "code",
+                        "stageField": "node"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"errortext\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "Wrangler",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "ErrorCollector"
+            },
+            {
+                "name": "GCSError",
+                "plugin": {
+                    "name": "GCS",
+                    "type": "batchsink",
+                    "label": "GCSError",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "proveedores-error",
+                        "project": "auto-detect",
+                        "path": "${error_uri}",
+                        "suffix": "yyyy-MM-dd-HH-mm",
+                        "format": "csv",
+                        "delimiter": ",",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "location": "us",
+                        "schema": "{\"type\":\"record\",\"name\":\"errortext\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"errortext\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}",
+                "inputSchema": [
+                    {
+                        "name": "ErrorCollector",
+                        "schema": "{\"type\":\"record\",\"name\":\"errortext\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "GCSError"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Pipeline batch - ingesta de proveedores",
+        "maxConcurrentRuns": 1
+    }
+}

@@ -1,0 +1,335 @@
+{
+    "name": "batch_jerarquia_tienda_v25",
+    "description": "Pipeline batch para Jerarquía de Tiendas",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "GCSFile",
+                "to": "is_tipo_tienda"
+            },
+            {
+                "from": "is_tipo_tienda",
+                "to": "WTipoTienda",
+                "condition": "true"
+            },
+            {
+                "from": "WTipoTienda",
+                "to": "LTipoTienda"
+            },
+            {
+                "from": "LTipoTienda",
+                "to": "TTipoTienda"
+            },
+            {
+                "from": "is_tipo_tienda",
+                "to": "WTiendas",
+                "condition": "false"
+            },
+            {
+                "from": "WTiendas",
+                "to": "LTiendas"
+            },
+            {
+                "from": "LTiendas",
+                "to": "TTiendas"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "GCSFile",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "GCSFile",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "filenameOnly": "false",
+                        "copyHeader": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                        "path": "${input_uri}",
+                        "format": "text",
+                        "project": "crp-dev-cdp-digital",
+                        "recursive": "false",
+                        "referenceName": "corp-dev-transient-main-v6b.CDP_DWH_INB_TIPOTIENDA.dat",
+                        "skipHeader": "false",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "encrypted": "false",
+                        "fileEncoding": "UTF-8"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "GCSFile"
+            },
+            {
+                "name": "is_tipo_tienda",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_tipo_tienda",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*TIPOTIENDA_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "GCSFile",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_tipo_tienda"
+            },
+            {
+                "name": "WTipoTienda",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WTipoTienda",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "ceb2df3a-98a6-405b-98bb-1b9d9ce43aa4",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6\ntrim body_1\ntrim body_4\ntrim body_7\nfilter-rows-on condition-true body_1 == null || body_1 =~ \"^\\W*$\"\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "on-error": "skip-error"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_tipo_tienda",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WTipoTienda"
+            },
+            {
+                "name": "LTipoTienda",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LTipoTienda",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-tipo-tienda",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WTipoTienda",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LTipoTienda"
+            },
+            {
+                "name": "TTipoTienda",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TTipoTienda",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, 'TIPO_DE_TIENDA'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TTipoTienda"
+            },
+            {
+                "name": "WTiendas",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WTiendas",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body,body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15,body_17,body_18,body_20,body_21,body_23,body_24,body_26,body_27,body_29,body_30,body_32,body_33,body_35,body_36,body_38,body_39,body_41,body_42,body_44,body_45,body_47,body_48,body_50,body_51,body_53,body_54,body_56,body_57,body_59,body_60,body_62,body_63,body_65,body_66,body_68,body_69,body_71,body_72,body_74,body_75,body_77,body_78,body_80,body_81,body_83,body_84,body_86,body_87,body_89,body_90,body_92,body_93,body_95,body_96,body_98,body_99,body_101,body_102,body_104,body_105\ntrim body_1\ntrim body_4\ntrim body_7\ntrim body_10\ntrim body_13\ntrim body_16\ntrim body_19\ntrim body_22\ntrim body_25\ntrim body_28\ntrim body_31\ntrim body_34\ntrim body_37\ntrim body_40\ntrim body_43\ntrim body_46\ntrim body_49\ntrim body_52\ntrim body_55\ntrim body_58\ntrim body_61\ntrim body_64\ntrim body_67\ntrim body_70\ntrim body_73\ntrim body_76\ntrim body_79\ntrim body_82\ntrim body_85\ntrim body_88\ntrim body_91\ntrim body_94\ntrim body_97\ntrim body_100\ntrim body_103\ntrim body_106\nfilter-rows-on condition-true body_1 == null || body_1 =~ \"^\\W*$\"\nrename body_1 clave_homologada\nrename body_4 descripcion_tienda_o_locacion\nrename body_7 id_tipo_tienda\nrename body_10 calle\nrename body_13 colonia\nrename body_16 ciudad\nrename body_19 municipio\nrename body_22 entidad_federativa\nrename body_25 telefono\nrename body_28 pisos\nrename body_31 codigo_postal\nrename body_34 latitud\nrename body_37 longitud\nrename body_40 punto_venta_metros_cuadrados\nrename body_43 total_metros_cuadrados\nrename body_46 cantidad_empleados\nrename body_49 banner\nrename body_52 fecha_modificacion_banner\nrename body_55 nombre_direccion\nrename body_58 telefono1\nrename body_61 renta_liverpool\nrename body_64 cantidad_entradas\nrename body_67 cantidad_estacionamientos\nrename body_70 cantidad_recepciones_cort\nrename body_73 cantidad_trailers\nrename body_76 cantidad_envios_cort\nrename body_79 fecha_ultima_remodelacion\nrename body_82 fecha_inicio\nrename body_85 fecha_fin\nrename body_88 fecha_apertura\nrename body_91 fecha_cierre\nrename body_94 fecha_apertura_credito\nrename body_97 zona_locacion\nrename body_100 pais\nrename body_103 grupo_tienda\nrename body_106 fecha_carga\nset-type :punto_venta_metros_cuadrados float\nset-type :punto_venta_metros_cuadrados integer\nset-type :total_metros_cuadrados float\nset-type :total_metros_cuadrados integer\nset-type :cantidad_empleados integer\nparse-as-simple-date :fecha_modificacion_banner yyyy-MM-dd\nset-type :cantidad_entradas integer\nset-type :cantidad_estacionamientos integer\nset-type :cantidad_recepciones_cort integer\nset-type :cantidad_trailers integer\nset-type :cantidad_envios_cort integer\nparse-as-simple-date :fecha_ultima_remodelacion yyyy-MM-dd\nparse-as-simple-date :fecha_inicio yyyy-MM-dd\nparse-as-simple-date :fecha_fin yyyy-MM-dd\nparse-as-simple-date :fecha_apertura yyyy-MM-dd\nparse-as-simple-date :fecha_cierre yyyy-MM-dd\nparse-as-simple-date :fecha_apertura_credito yyyy-MM-dd\nparse-as-simple-date :fecha_carga yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_tienda_o_locacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_tienda\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle\",\"type\":[\"string\",\"null\"]},{\"name\":\"colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"ciudad\",\"type\":[\"string\",\"null\"]},{\"name\":\"municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"entidad_federativa\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono\",\"type\":[\"string\",\"null\"]},{\"name\":\"pisos\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal\",\"type\":[\"string\",\"null\"]},{\"name\":\"latitud\",\"type\":[\"string\",\"null\"]},{\"name\":\"longitud\",\"type\":[\"string\",\"null\"]},{\"name\":\"punto_venta_metros_cuadrados\",\"type\":[\"int\",\"null\"]},{\"name\":\"total_metros_cuadrados\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_empleados\",\"type\":[\"int\",\"null\"]},{\"name\":\"banner\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_modificacion_banner\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"nombre_direccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono1\",\"type\":[\"string\",\"null\"]},{\"name\":\"renta_liverpool\",\"type\":[\"string\",\"null\"]},{\"name\":\"cantidad_entradas\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_estacionamientos\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_recepciones_cort\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_trailers\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_envios_cort\",\"type\":[\"int\",\"null\"]},{\"name\":\"fecha_ultima_remodelacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_inicio\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_fin\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_apertura\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_cierre\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_apertura_credito\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"zona_locacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"pais\",\"type\":[\"string\",\"null\"]},{\"name\":\"grupo_tienda\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_carga\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "ccd6e4bf966250fe860dc4bca749c186"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_tienda_o_locacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_tienda\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle\",\"type\":[\"string\",\"null\"]},{\"name\":\"colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"ciudad\",\"type\":[\"string\",\"null\"]},{\"name\":\"municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"entidad_federativa\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono\",\"type\":[\"string\",\"null\"]},{\"name\":\"pisos\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal\",\"type\":[\"string\",\"null\"]},{\"name\":\"latitud\",\"type\":[\"string\",\"null\"]},{\"name\":\"longitud\",\"type\":[\"string\",\"null\"]},{\"name\":\"punto_venta_metros_cuadrados\",\"type\":[\"int\",\"null\"]},{\"name\":\"total_metros_cuadrados\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_empleados\",\"type\":[\"int\",\"null\"]},{\"name\":\"banner\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_modificacion_banner\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"nombre_direccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono1\",\"type\":[\"string\",\"null\"]},{\"name\":\"renta_liverpool\",\"type\":[\"string\",\"null\"]},{\"name\":\"cantidad_entradas\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_estacionamientos\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_recepciones_cort\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_trailers\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_envios_cort\",\"type\":[\"int\",\"null\"]},{\"name\":\"fecha_ultima_remodelacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_inicio\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_fin\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_apertura\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_cierre\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_apertura_credito\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"zona_locacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"pais\",\"type\":[\"string\",\"null\"]},{\"name\":\"grupo_tienda\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_carga\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_tipo_tienda",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WTiendas"
+            },
+            {
+                "name": "LTiendas",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LTiendas",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-tiendas",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "tiendas_y_locaciones_tmp",
+                        "columns": "clave_homologada, descripcion_tienda_o_locacion, id_tipo_tienda, calle, colonia, ciudad, municipio, entidad_federativa, telefono, pisos, codigo_postal, latitud, longitud, punto_venta_metros_cuadrados, total_metros_cuadrados, cantidad_empleados, banner, fecha_modificacion_banner, nombre_direccion, telefono1, renta_liverpool, cantidad_entradas, cantidad_estacionamientos, cantidad_recepciones_cort, cantidad_trailers, cantidad_envios_cort, fecha_ultima_remodelacion, fecha_inicio, fecha_fin, fecha_apertura, fecha_cierre, fecha_apertura_credito, zona_locacion, pais, grupo_tienda, fecha_carga",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_tienda_o_locacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_tienda\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle\",\"type\":[\"string\",\"null\"]},{\"name\":\"colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"ciudad\",\"type\":[\"string\",\"null\"]},{\"name\":\"municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"entidad_federativa\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono\",\"type\":[\"string\",\"null\"]},{\"name\":\"pisos\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal\",\"type\":[\"string\",\"null\"]},{\"name\":\"latitud\",\"type\":[\"string\",\"null\"]},{\"name\":\"longitud\",\"type\":[\"string\",\"null\"]},{\"name\":\"punto_venta_metros_cuadrados\",\"type\":[\"int\",\"null\"]},{\"name\":\"total_metros_cuadrados\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_empleados\",\"type\":[\"int\",\"null\"]},{\"name\":\"banner\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_modificacion_banner\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"nombre_direccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono1\",\"type\":[\"string\",\"null\"]},{\"name\":\"renta_liverpool\",\"type\":[\"string\",\"null\"]},{\"name\":\"cantidad_entradas\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_estacionamientos\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_recepciones_cort\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_trailers\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_envios_cort\",\"type\":[\"int\",\"null\"]},{\"name\":\"fecha_ultima_remodelacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_inicio\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_fin\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_apertura\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_cierre\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_apertura_credito\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"zona_locacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"pais\",\"type\":[\"string\",\"null\"]},{\"name\":\"grupo_tienda\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_carga\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WTiendas",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_tienda_o_locacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_tienda\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle\",\"type\":[\"string\",\"null\"]},{\"name\":\"colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"ciudad\",\"type\":[\"string\",\"null\"]},{\"name\":\"municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"entidad_federativa\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono\",\"type\":[\"string\",\"null\"]},{\"name\":\"pisos\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal\",\"type\":[\"string\",\"null\"]},{\"name\":\"latitud\",\"type\":[\"string\",\"null\"]},{\"name\":\"longitud\",\"type\":[\"string\",\"null\"]},{\"name\":\"punto_venta_metros_cuadrados\",\"type\":[\"int\",\"null\"]},{\"name\":\"total_metros_cuadrados\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_empleados\",\"type\":[\"int\",\"null\"]},{\"name\":\"banner\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_modificacion_banner\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"nombre_direccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono1\",\"type\":[\"string\",\"null\"]},{\"name\":\"renta_liverpool\",\"type\":[\"string\",\"null\"]},{\"name\":\"cantidad_entradas\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_estacionamientos\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_recepciones_cort\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_trailers\",\"type\":[\"int\",\"null\"]},{\"name\":\"cantidad_envios_cort\",\"type\":[\"int\",\"null\"]},{\"name\":\"fecha_ultima_remodelacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_inicio\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_fin\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_apertura\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_cierre\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_apertura_credito\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"zona_locacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"pais\",\"type\":[\"string\",\"null\"]},{\"name\":\"grupo_tienda\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_carga\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LTiendas"
+            },
+            {
+                "name": "TTiendas",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TTiendas",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tyl AS (\n\tSELECT *\n\tFROM staging.tiendas_y_locaciones_tmp\n), col_ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, entidad_origen)\n\tSELECT\n    \ttyl.colonia, tyl.colonia, 'COLONIAS'\n\tFROM tyl\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n\tRETURNING id_catalogo, clave_homologada, entidad_origen\n), col AS (\n\tSELECT *\n\tFROM col_ins\n\tUNION\n\tSELECT col_sel.id_catalogo, col_sel.clave_homologada, col_sel.entidad_origen\n\tFROM shared.catalogos col_sel\n\tINNER JOIN tyl ON col_sel.clave_homologada = tyl.colonia AND col_sel.entidad_origen = 'COLONIAS'\n), mpo_ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, entidad_origen)\n\tSELECT\n    \ttyl.municipio, tyl.municipio, 'MUNICIPIOS'\n\tFROM tyl\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n\tRETURNING id_catalogo, clave_homologada, entidad_origen\n), mpo AS (\n\tSELECT *\n\tFROM mpo_ins\n\tUNION\n\tSELECT mpo_sel.id_catalogo, mpo_sel.clave_homologada, mpo_sel.entidad_origen\n\tFROM shared.catalogos mpo_sel\n\tINNER JOIN tyl ON mpo_sel.clave_homologada = tyl.municipio AND mpo_sel.entidad_origen = 'MUNICIPIOS'\n), ciu_ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, entidad_origen)\n\tSELECT\n    \ttyl.ciudad, tyl.ciudad, 'CIUDADES'\n\tFROM tyl\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n\tRETURNING id_catalogo, clave_homologada, entidad_origen\n), ciu AS (\n\tSELECT *\n\tFROM ciu_ins\n\tUNION\n\tSELECT ciu_sel.id_catalogo, ciu_sel.clave_homologada, ciu_sel.entidad_origen\n\tFROM shared.catalogos ciu_sel\n\tINNER JOIN tyl ON ciu_sel.clave_homologada = tyl.ciudad AND ciu_sel.entidad_origen = 'CIUDADES'\n), edo_ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, entidad_origen)\n\tSELECT\n    \ttyl.entidad_federativa, tyl.entidad_federativa, 'ENTIDADES_FEDERATIVAS'\n\tFROM tyl\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n\tRETURNING id_catalogo, clave_homologada, entidad_origen\n), edo AS (\n\tSELECT *\n\tFROM edo_ins\n\tUNION\n\tSELECT edo_sel.id_catalogo, edo_sel.clave_homologada, edo_sel.entidad_origen\n\tFROM shared.catalogos edo_sel\n\tINNER JOIN tyl ON edo_sel.clave_homologada = tyl.entidad_federativa AND edo_sel.entidad_origen = 'ENTIDADES_FEDERATIVAS'\n), pai_ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, entidad_origen)\n\tSELECT\n    \ttyl.pais, tyl.pais, 'PAISES'\n\tFROM tyl\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n\tRETURNING id_catalogo, clave_homologada, entidad_origen\n), pai AS (\n\tSELECT *\n\tFROM pai_ins\n\tUNION\n\tSELECT pai_sel.id_catalogo, pai_sel.clave_homologada, pai_sel.entidad_origen\n\tFROM shared.catalogos pai_sel\n\tINNER JOIN tyl ON pai_sel.clave_homologada = tyl.pais AND pai_sel.entidad_origen = 'PAISES'\n), zl_ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, entidad_origen)\n\tSELECT\n    \ttyl.zona_locacion, tyl.zona_locacion, 'ZONAS_DE_LOCACION'\n\tFROM tyl\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n\tRETURNING id_catalogo, clave_homologada, entidad_origen\n), zl AS (\n\tSELECT *\n\tFROM zl_ins\n\tUNION\n\tSELECT zl_sel.id_catalogo, zl_sel.clave_homologada, zl_sel.entidad_origen\n\tFROM shared.catalogos zl_sel\n\tINNER JOIN tyl ON zl_sel.clave_homologada = tyl.zona_locacion AND zl_sel.entidad_origen = 'ZONAS_DE_LOCACION'\n), gt_ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, entidad_origen)\n\tSELECT\n    \ttyl.grupo_tienda, tyl.grupo_tienda, 'GRUPOS_DE_TIENDA'\n\tFROM tyl\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n\tRETURNING id_catalogo, clave_homologada, entidad_origen\n), gt AS (\n\tSELECT *\n\tFROM gt_ins\n\tUNION\n\tSELECT gt_sel.id_catalogo, gt_sel.clave_homologada, gt_sel.entidad_origen\n\tFROM shared.catalogos gt_sel\n\tINNER JOIN tyl ON gt_sel.clave_homologada = tyl.grupo_tienda AND gt_sel.entidad_origen = 'GRUPOS_DE_TIENDA'\n)\nINSERT INTO shared.tiendas_y_locaciones(id_tienda_o_locacion, \n\tclave_homologada, descripcion_tienda_o_locacion, id_tipo_tienda, calle, id_colonia, id_ciudad, id_municipio, \n\tid_entidad_federativa, telefono, pisos, codigo_postal, latitud, longitud, punto_venta_metros_cuadrados, \n\ttotal_metros_cuadrados, cantidad_empleados, banner, fecha_modificacion_banner, nombre_direccion, \n\ttelefono1, renta_liverpool, cantidad_entradas, cantidad_estacionamientos, cantidad_recepciones_cort, \n\tcantidad_trailers, cantidad_envios_cort, fecha_ultima_remodelacion, fecha_inicio, fecha_fin, \n\tfecha_apertura, fecha_cierre, fecha_apertura_credito, id_zona_locacion, id_pais, id_grupo_tienda, fecha_carga)\nSELECT nextval('shared.seq_tiendas_y_locaciones_pk'::regclass),\n\ttyl.clave_homologada, descripcion_tienda_o_locacion, id_tipo_tienda, calle, col.id_catalogo, ciu.id_catalogo, mpo.id_catalogo, \n\tedo.id_catalogo, telefono, pisos, codigo_postal, latitud, longitud, punto_venta_metros_cuadrados, \n\ttotal_metros_cuadrados, cantidad_empleados, banner, fecha_modificacion_banner, nombre_direccion, \n\ttelefono1, renta_liverpool, cantidad_entradas, cantidad_estacionamientos, cantidad_recepciones_cort, \n\tcantidad_trailers, cantidad_envios_cort, fecha_ultima_remodelacion, fecha_inicio, fecha_fin, \n\tfecha_apertura, fecha_cierre, fecha_apertura_credito, zl.id_catalogo, pai.id_catalogo, gt.id_catalogo, fecha_carga\nFROM\n\ttyl\nLEFT JOIN pai ON pai.clave_homologada = tyl.pais AND pai.entidad_origen = 'PAISES'\nLEFT JOIN edo ON edo.clave_homologada = tyl.entidad_federativa AND edo.entidad_origen = 'ENTIDADES_FEDERATIVAS'\nLEFT JOIN ciu ON ciu.clave_homologada = tyl.ciudad AND ciu.entidad_origen = 'CIUDADES'\nLEFT JOIN mpo ON mpo.clave_homologada = tyl.municipio AND mpo.entidad_origen = 'MUNICIPIOS'\nLEFT JOIN col ON col.clave_homologada = tyl.colonia AND col.entidad_origen = 'COLONIAS'\nLEFT JOIN zl ON zl.clave_homologada = tyl.zona_locacion AND zl.entidad_origen = 'ZONAS_DE_LOCACION'\nLEFT JOIN gt ON gt.clave_homologada = tyl.grupo_tienda AND gt.entidad_origen = 'GRUPOS_DE_TIENDA'",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TTiendas"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Pipeline batch para Jerarquía de Tiendas",
+        "maxConcurrentRuns": 1
+    }
+}

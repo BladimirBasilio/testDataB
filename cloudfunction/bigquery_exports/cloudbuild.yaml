@@ -1,0 +1,49 @@
+steps:
+  - id: "unit test"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    entrypoint: "/bin/bash"
+    args: ["${_FOLDER}/scripts/unit_test.sh"]
+    env:
+      - "FOLDER=$_FOLDER"
+  - id: "zip source"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    entrypoint: /bin/bash
+    args:
+      - -c
+      - |
+        if [ ! $(command -v zip) ]; then apt update && apt install zip -y; fi
+        cd  ${_FOLDER}/source/
+        zip cf.zip -r *
+        zip -T cf.zip
+
+  - id: "gsutil cp zip artifact"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    entrypoint: /bin/bash
+    args:
+      - -c
+      - |
+        gsutil cp ${_FOLDER}/source/cf.zip gs://${_ARTIFACT_BUCKET_NAME}/${_CDP_PROJECT_ID}/cloud-functions/${_FOLDER}/${BUILD_ID}/cf.zip
+
+  - id: "deploy cloud function"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    entrypoint: "/bin/bash"
+    args:
+      [
+        "${_FOLDER}/scripts/deploy_function.sh",
+        "gs://${_ARTIFACT_BUCKET_NAME}/${_CDP_PROJECT_ID}/cloud-functions/${_FOLDER}/${BUILD_ID}/cf.zip",
+      ]
+    env:
+      - "PROJECT_ID=$_CDP_PROJECT_ID"
+      - "ENTRYPOINTNAME=$_ENTRYPOINTNAME"
+      - "FOLDER=$_FOLDER"
+      - "FUNCTION_NAME=$_FUNCTION_NAME"
+      - "LOCATION=$_LOCATION"
+      - "SERVICE_ACCOUNT=$_SERVICE_ACCOUNT"
+      - "TRIGGER_TOPIC_NAME=$_TRIGGER_TOPIC_NAME"
+
+artifacts:
+  objects:
+    location: "gs://${_ARTIFACT_BUCKET_NAME}/${_CDP_PROJECT_ID}/cloud-functions/${_FOLDER}/${BUILD_ID}"
+    paths: ["${_FOLDER}/cloudbuild.yaml"]
+##
+#

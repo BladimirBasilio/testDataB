@@ -1,0 +1,264 @@
+{
+    "name": "batch_pedidos-soms",
+    "description": "Pipeline de ingesta batch de pedidos SOMS, remisiones y órdenes de compra.",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "PedidosSOMS",
+                "to": "Wrangler"
+            },
+            {
+                "from": "Wrangler",
+                "to": "DBLoad"
+            },
+            {
+                "from": "Wrangler",
+                "to": "ErrorCollector"
+            },
+            {
+                "from": "DBLoad",
+                "to": "DBTransform"
+            },
+            {
+                "from": "ErrorCollector",
+                "to": "ErrorFile"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "PedidosSOMS",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "PedidosSOMS",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "filenameOnly": "false",
+                        "copyHeader": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                        "path": "${input_path}",
+                        "serviceFilePath": "auto-detect",
+                        "format": "text",
+                        "project": "auto-detect",
+                        "recursive": "false",
+                        "referenceName": "gcs-cdp.FILE_CDP_SOMS.TXT",
+                        "skipHeader": "false",
+                        "serviceAccountType": "filePath",
+                        "encrypted": "false",
+                        "fileEncoding": "UTF-8"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                "id": "PedidosSOMS",
+                "type": "batchsource",
+                "label": "PedidosSOMS",
+                "icon": "fa-plug"
+            },
+            {
+                "name": "Wrangler",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "Wrangler",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "caaeae0b-b320-4a13-a5c1-5f56c56c86cb",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body,body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15,body_17,body_18,body_20,body_21,body_23,body_24,body_26,body_29,body_30,body_32,body_33,body_35,body_36,body_38,body_39,body_41,body_42,body_44,body_45,body_47,body_48,body_50,body_51,body_53,body_54,body_56,body_57,body_59,body_60,body_62,body_63,body_65,body_66,body_68,body_69,body_71,body_72,body_74,body_75,body_77,body_78,body_80,body_81,body_83,body_84,body_86,body_87,body_89,body_90,body_92,body_93,body_95,body_96,body_98,body_99,body_101,body_102,body_104,body_105,body_107,body_108,body_110,body_111,body_113,body_114,body_116,body_117,body_119,body_120,body_122,body_123,body_125,body_126,body_128,body_129,body_131,body_132,body_134,body_135,body_137,body_138,body_140,body_141,body_143,body_144,body_146,body_147,body_149,body_150,body_152,body_153,body_155,body_156,body_158,body_159,body_161,body_162,body_163,body_27\nrename body_1 numero_del_documento\nrename body_4 id_sku\nrename body_7 piezas\nrename body_10 id_locaciones\nrename id_locaciones numero_de_intentos_de_entrega\nrename body_13 estado_por_linea\nrename body_16 fecha_de_compra\nrename body_19 fecha_actualizacion_estado\nrename body_22 hora_actualizacion_estado\nrename body_25 usuario_actualizador_estado\nrename body_28 id_tipo_entrega\nrename body_31 numero_de_guia\nrename body_34 proveedor_de_mensajeria\nrename body_37 id_cliente_remitente\nrename body_40 nombre_remitente\nrename body_43 telefono_celular_remitente\nrename body_46 telefono_fijo_remitente\nrename body_49 telefono_oficina_remitente\nrename body_52 correo_electronico_remitente\nrename body_55 id_cliente_destinatario\nrename body_58 nombre_destinatario\nrename body_61 apellido_paterno_destinatario\nrename body_64 apellido_materno_destinatario\nrename body_67 calle_destinatario\nrename body_70 numero_exterior_destinatario\nrename body_73 numero_interior_destinatario\nrename body_76 codigo_postal_destinatario\nrename body_79 colonia_destinatario\nrename body_82 municipio_destinatario\nrename body_85 estado_destinatario\nrename body_88 entre_calle_destinatario\nrename body_91 y_calle_destinatario\nrename body_94 telefono_celular_destinatario\nrename body_97 telefono_fijo_destinatario\nrename body_100 telefono_oficina_destinatario\nrename body_103 correo_electronico_destinatario\nrename body_106 fecha_rango_promesa_entrega\nrename body_109 fecha_recalculada\nrename body_112 fecha_real_entrega\nrename body_115 indicador_mkp\nrename body_118 id_tipo_documento\nrename body_121 id_tipo_act\nrename body_124 hora_emision\nrename body_127 fecha_emision\nrename body_130 locacion_destino\nrename body_133 locacion_que_surte\nrename body_136 fecha_surtido\nrename body_139 cantidad_recogida\nrename body_142 causa_no_entrega\nrename body_145 frecuencia_visita\nrename body_148 periodicidad\nrename body_151 cantidad_cancelada\nrename body_154 cantidad_entregada\nrename body_157 observaciones\nrename body_160 orden_original\ntrim numero_del_documento\ntrim id_sku\ntrim piezas\nset-type :piezas float\ntrim numero_de_intentos_de_entrega\ntrim estado_por_linea\ntrim fecha_de_compra\nparse-as-simple-date :fecha_de_compra yyyy-MM-dd\ntrim fecha_actualizacion_estado\nparse-as-simple-date :fecha_actualizacion_estado yyyy-MM-dd\ntrim hora_actualizacion_estado\nparse-as-simple-date :hora_actualizacion_estado HH.mm.ss\ntrim usuario_actualizador_estado\ntrim id_tipo_entrega\ntrim numero_de_guia\ntrim proveedor_de_mensajeria\ntrim id_cliente_remitente\ntrim nombre_remitente\ntrim telefono_celular_remitente\ntrim telefono_fijo_remitente\ntrim telefono_oficina_remitente\ntrim correo_electronico_remitente\ntrim id_cliente_destinatario\ntrim nombre_destinatario\ntrim apellido_paterno_destinatario\ntrim apellido_materno_destinatario\ntrim calle_destinatario\ntrim numero_exterior_destinatario\ntrim numero_interior_destinatario\ntrim codigo_postal_destinatario\ntrim colonia_destinatario\ntrim municipio_destinatario\ntrim estado_destinatario\ntrim entre_calle_destinatario\ntrim y_calle_destinatario\ntrim telefono_celular_destinatario\ntrim telefono_fijo_destinatario\ntrim telefono_oficina_destinatario\ntrim correo_electronico_destinatario\ntrim fecha_rango_promesa_entrega\nparse-as-simple-date :fecha_rango_promesa_entrega yyyy-MM-dd\ntrim fecha_recalculada\nparse-as-simple-date :fecha_recalculada yyyy-MM-dd\ntrim fecha_real_entrega\nparse-as-simple-date :fecha_real_entrega yyyy-MM-dd\ntrim indicador_mkp\ntrim id_tipo_documento\ntrim id_tipo_act\ntrim hora_emision\nparse-as-simple-date :hora_emision HH.mm.ss\ntrim fecha_emision\nparse-as-simple-date :fecha_emision yyyy-MM-dd\ntrim locacion_destino\ntrim locacion_que_surte\ntrim fecha_surtido\nparse-as-simple-date :fecha_surtido yyyy-MM-dd\ntrim cantidad_recogida\nset-type :cantidad_recogida float\ntrim causa_no_entrega\ntrim frecuencia_visita\ntrim periodicidad\ntrim cantidad_cancelada\nset-type :cantidad_cancelada float\ntrim cantidad_entregada\nset-type :cantidad_entregada float\ntrim observaciones\ntrim orden_original\nset-type :id_sku integer\nset-type :numero_de_intentos_de_entrega integer\nset-type :id_cliente_remitente integer\nset-type :id_cliente_destinatario integer\nset-type :locacion_destino integer\nset-type :locacion_que_surte integer",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"numero_del_documento\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_sku\",\"type\":[\"int\",\"null\"]},{\"name\":\"piezas\",\"type\":[\"float\",\"null\"]},{\"name\":\"numero_de_intentos_de_entrega\",\"type\":[\"int\",\"null\"]},{\"name\":\"estado_por_linea\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_compra\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion_estado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"hora_actualizacion_estado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"usuario_actualizador_estado\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_entrega\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_de_guia\",\"type\":[\"string\",\"null\"]},{\"name\":\"proveedor_de_mensajeria\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_cliente_remitente\",\"type\":[\"int\",\"null\"]},{\"name\":\"nombre_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_celular_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_fijo_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_oficina_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"correo_electronico_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_cliente_destinatario\",\"type\":[\"int\",\"null\"]},{\"name\":\"nombre_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_exterior_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_interior_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"colonia_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"municipio_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"estado_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"entre_calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"y_calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_celular_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_fijo_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_oficina_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"correo_electronico_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_rango_promesa_entrega\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_recalculada\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_real_entrega\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"indicador_mkp\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_documento\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_act\",\"type\":[\"string\",\"null\"]},{\"name\":\"hora_emision\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_emision\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"locacion_destino\",\"type\":[\"int\",\"null\"]},{\"name\":\"locacion_que_surte\",\"type\":[\"int\",\"null\"]},{\"name\":\"fecha_surtido\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"cantidad_recogida\",\"type\":[\"float\",\"null\"]},{\"name\":\"causa_no_entrega\",\"type\":[\"string\",\"null\"]},{\"name\":\"frecuencia_visita\",\"type\":[\"string\",\"null\"]},{\"name\":\"periodicidad\",\"type\":[\"string\",\"null\"]},{\"name\":\"cantidad_cancelada\",\"type\":[\"float\",\"null\"]},{\"name\":\"cantidad_entregada\",\"type\":[\"float\",\"null\"]},{\"name\":\"observaciones\",\"type\":[\"string\",\"null\"]},{\"name\":\"orden_original\",\"type\":[\"string\",\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "on-error": "fail-pipeline"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"numero_del_documento\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_sku\",\"type\":[\"int\",\"null\"]},{\"name\":\"piezas\",\"type\":[\"float\",\"null\"]},{\"name\":\"numero_de_intentos_de_entrega\",\"type\":[\"int\",\"null\"]},{\"name\":\"estado_por_linea\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_compra\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion_estado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"hora_actualizacion_estado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"usuario_actualizador_estado\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_entrega\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_de_guia\",\"type\":[\"string\",\"null\"]},{\"name\":\"proveedor_de_mensajeria\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_cliente_remitente\",\"type\":[\"int\",\"null\"]},{\"name\":\"nombre_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_celular_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_fijo_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_oficina_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"correo_electronico_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_cliente_destinatario\",\"type\":[\"int\",\"null\"]},{\"name\":\"nombre_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_exterior_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_interior_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"colonia_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"municipio_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"estado_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"entre_calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"y_calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_celular_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_fijo_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_oficina_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"correo_electronico_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_rango_promesa_entrega\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_recalculada\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_real_entrega\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"indicador_mkp\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_documento\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_act\",\"type\":[\"string\",\"null\"]},{\"name\":\"hora_emision\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_emision\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"locacion_destino\",\"type\":[\"int\",\"null\"]},{\"name\":\"locacion_que_surte\",\"type\":[\"int\",\"null\"]},{\"name\":\"fecha_surtido\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"cantidad_recogida\",\"type\":[\"float\",\"null\"]},{\"name\":\"causa_no_entrega\",\"type\":[\"string\",\"null\"]},{\"name\":\"frecuencia_visita\",\"type\":[\"string\",\"null\"]},{\"name\":\"periodicidad\",\"type\":[\"string\",\"null\"]},{\"name\":\"cantidad_cancelada\",\"type\":[\"float\",\"null\"]},{\"name\":\"cantidad_entregada\",\"type\":[\"float\",\"null\"]},{\"name\":\"observaciones\",\"type\":[\"string\",\"null\"]},{\"name\":\"orden_original\",\"type\":[\"string\",\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "PedidosSOMS",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "Wrangler",
+                "type": "transform",
+                "label": "Wrangler",
+                "icon": "icon-DataPreparation"
+            },
+            {
+                "name": "DBLoad",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "DBLoad",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-pedidos-soms",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${connection_string}",
+                        "tableName": "pedidos_soms",
+                        "columns": "numero_del_documento,id_sku,piezas,numero_de_intentos_de_entrega,estado_por_linea,fecha_de_compra,fecha_actualizacion_estado,hora_actualizacion_estado,usuario_actualizador_estado,id_tipo_entrega,numero_de_guia,proveedor_de_mensajeria,id_cliente_remitente,nombre_remitente,telefono_celular_remitente,telefono_fijo_remitente,telefono_oficina_remitente,correo_electronico_remitente,id_cliente_destinatario,nombre_destinatario,apellido_paterno_destinatario,apellido_materno_destinatario,calle_destinatario,numero_exterior_destinatario,numero_interior_destinatario,codigo_postal_destinatario,colonia_destinatario,municipio_destinatario,estado_destinatario,entre_calle_destinatario,y_calle_destinatario,telefono_celular_destinatario,telefono_fijo_destinatario,telefono_oficina_destinatario,correo_electronico_destinatario,fecha_rango_promesa_entrega,fecha_recalculada,fecha_real_entrega,indicador_mkp,id_tipo_documento,id_tipo_act,hora_emision,fecha_emision,locacion_destino,locacion_que_surte,fecha_surtido,cantidad_recogida,causa_no_entrega,frecuencia_visita,periodicidad,cantidad_cancelada,cantidad_entregada,observaciones,orden_original",
+                        "user": "${secure(db_username)}",
+                        "password": "${secure(db_password)}",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE",
+                        "connectionArguments": "currentSchema=staging"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"body\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_del_documento\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"piezas\",\"type\":[\"float\",\"null\"]},{\"name\":\"numero_de_intentos_de_entrega\",\"type\":[\"int\",\"null\"]},{\"name\":\"estado_por_linea\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_compra\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion_estado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"hora_actualizacion_estado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"usuario_actualizador_estado\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_entrega\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_de_guia\",\"type\":[\"string\",\"null\"]},{\"name\":\"proveedor_de_mensajeria\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_cliente_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"nombre_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_celular_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_fijo_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_oficina_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"correo_electronico_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_cliente_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"nombre_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_exterior_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_interior_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"colonia_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"municipio_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"estado_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"entre_calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"y_calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_celular_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_fijo_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_oficina_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"correo_electronico_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_rango_promesa_entrega\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_recalculada\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_real_entrega\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"indicador_mkp\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_documento\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_act\",\"type\":[\"string\",\"null\"]},{\"name\":\"hora_emision\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_emision\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"locacion_destino\",\"type\":[\"string\",\"null\"]},{\"name\":\"locacion_que_surte\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_surtido\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"cantidad_recogida\",\"type\":[\"float\",\"null\"]},{\"name\":\"causa_no_entrega\",\"type\":[\"string\",\"null\"]},{\"name\":\"frecuencia_visita\",\"type\":[\"string\",\"null\"]},{\"name\":\"periodicidad\",\"type\":[\"string\",\"null\"]},{\"name\":\"cantidad_cancelada\",\"type\":[\"float\",\"null\"]},{\"name\":\"cantidad_entregada\",\"type\":[\"float\",\"null\"]},{\"name\":\"observaciones\",\"type\":[\"string\",\"null\"]},{\"name\":\"orden_original\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "Wrangler",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"numero_del_documento\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_sku\",\"type\":[\"int\",\"null\"]},{\"name\":\"piezas\",\"type\":[\"float\",\"null\"]},{\"name\":\"numero_de_intentos_de_entrega\",\"type\":[\"int\",\"null\"]},{\"name\":\"estado_por_linea\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_compra\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion_estado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"hora_actualizacion_estado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"usuario_actualizador_estado\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_entrega\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_de_guia\",\"type\":[\"string\",\"null\"]},{\"name\":\"proveedor_de_mensajeria\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_cliente_remitente\",\"type\":[\"int\",\"null\"]},{\"name\":\"nombre_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_celular_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_fijo_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_oficina_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"correo_electronico_remitente\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_cliente_destinatario\",\"type\":[\"int\",\"null\"]},{\"name\":\"nombre_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_exterior_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_interior_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"colonia_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"municipio_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"estado_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"entre_calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"y_calle_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_celular_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_fijo_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"telefono_oficina_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"correo_electronico_destinatario\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_rango_promesa_entrega\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_recalculada\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_real_entrega\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"indicador_mkp\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_documento\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_tipo_act\",\"type\":[\"string\",\"null\"]},{\"name\":\"hora_emision\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_emision\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"locacion_destino\",\"type\":[\"int\",\"null\"]},{\"name\":\"locacion_que_surte\",\"type\":[\"int\",\"null\"]},{\"name\":\"fecha_surtido\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"cantidad_recogida\",\"type\":[\"float\",\"null\"]},{\"name\":\"causa_no_entrega\",\"type\":[\"string\",\"null\"]},{\"name\":\"frecuencia_visita\",\"type\":[\"string\",\"null\"]},{\"name\":\"periodicidad\",\"type\":[\"string\",\"null\"]},{\"name\":\"cantidad_cancelada\",\"type\":[\"float\",\"null\"]},{\"name\":\"cantidad_entregada\",\"type\":[\"float\",\"null\"]},{\"name\":\"observaciones\",\"type\":[\"string\",\"null\"]},{\"name\":\"orden_original\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "id": "DBLoad",
+                "type": "batchsink",
+                "label": "DBLoad",
+                "icon": "icon-database"
+            },
+            {
+                "name": "ErrorCollector",
+                "plugin": {
+                    "name": "ErrorCollector",
+                    "type": "errortransform",
+                    "label": "ErrorCollector",
+                    "artifact": {
+                        "name": "core-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "messageField": "msg",
+                        "codeField": "code",
+                        "stageField": "node"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"errortext\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "Wrangler",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "ErrorCollector",
+                "type": "errortransform",
+                "label": "ErrorCollector",
+                "icon": "fa-exclamation-triangle"
+            },
+            {
+                "name": "DBTransform",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "DBTransform",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginType": "jdbc",
+                        "enableAutoCommit": "false",
+                        "connectionString": "${connection_string}",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "user": "${secure(db_username)}",
+                        "password": "${secure(db_password)}",
+                        "query": "WITH ps AS (\n\tSELECT *\n\tFROM staging.pedidos_soms\n), rem AS (\n\tINSERT INTO clientes.clientes (id_cliente, primer_nombre)\n\tSELECT\n\t\tps.id_cliente_remitente, ps.nombre_remitente\n\tFROM\n\t\tps\n\tON CONFLICT ON CONSTRAINT pk_clientes\n\tDO NOTHING\n), cel_rem AS (\n\tINSERT INTO clientes.cliente_telefonos_de_contacto(\n\t\tid_cliente_telefonos_de_contacto, id_cliente, telefono, alias_telefono)\n\tSELECT\n\t\tnextval('clientes.seq_cliente_telefonos_de_contacto_pk'::regclass), ps.id_cliente_remitente,\n\t\tps.telefono_celular_remitente, 'CELULAR'\n\tFROM\n\t\tps\n), fij_rem AS (\n\tINSERT INTO clientes.cliente_telefonos_de_contacto(\n\t\tid_cliente_telefonos_de_contacto, id_cliente, telefono, alias_telefono)\n\tSELECT\n\t\tnextval('clientes.seq_cliente_telefonos_de_contacto_pk'::regclass), ps.id_cliente_remitente,\n\t\tps.telefono_fijo_remitente, 'CASA'\n\tFROM\n\t\tps\n), tra_rem AS (\n\tINSERT INTO clientes.cliente_telefonos_de_contacto(\n\t\tid_cliente_telefonos_de_contacto, id_cliente, telefono, alias_telefono)\n\tSELECT\n\t\tnextval('clientes.seq_cliente_telefonos_de_contacto_pk'::regclass), ps.id_cliente_remitente,\n\t\tps.telefono_oficina_remitente, 'TRABAJO'\n\tFROM\n\t\tps\n), mai_rem AS (\n\tINSERT INTO clientes.cliente_emails_de_contacto(\n\t\tid_cliente_emails_de_contacto, id_cliente, email, tipo)\n\tSELECT\n\t\tnextval('clientes.seq_cliente_emails_de_contacto_pk'::regclass), ps.id_cliente_remitente,\n\t\tps.correo_electronico_remitente, 'PERSONAL'\n\tFROM\n\t\tps\n), des AS (\n\tINSERT INTO clientes.clientes (id_cliente, primer_nombre, apellido_paterno, apellido_materno)\n\tSELECT\n\t\tps.id_cliente_destinatario, ps.nombre_destinatario, ps.apellido_paterno_destinatario, ps.apellido_materno_destinatario\n\tFROM\n\t\tps\n\tON CONFLICT ON CONSTRAINT pk_clientes\n\tDO NOTHING\n), cel_des AS (\n\tINSERT INTO clientes.cliente_telefonos_de_contacto(\n\t\tid_cliente_telefonos_de_contacto, id_cliente, telefono, alias_telefono)\n\tSELECT\n\t\tnextval('clientes.seq_cliente_telefonos_de_contacto_pk'::regclass), ps.id_cliente_destinatario,\n\t\tps.telefono_celular_destinatario, 'CELULAR'\n\tFROM\n\t\tps\n), fij_des AS (\n\tINSERT INTO clientes.cliente_telefonos_de_contacto(\n\t\tid_cliente_telefonos_de_contacto, id_cliente, telefono, alias_telefono)\n\tSELECT\n\t\tnextval('clientes.seq_cliente_telefonos_de_contacto_pk'::regclass), ps.id_cliente_destinatario,\n\t\tps.telefono_fijo_destinatario, 'CASA'\n\tFROM\n\t\tps\n), tra_des AS (\n\tINSERT INTO clientes.cliente_telefonos_de_contacto(\n\t\tid_cliente_telefonos_de_contacto, id_cliente, telefono, alias_telefono)\n\tSELECT\n\t\tnextval('clientes.seq_cliente_telefonos_de_contacto_pk'::regclass), ps.id_cliente_destinatario,\n\t\tps.telefono_oficina_destinatario, 'TRABAJO'\n\tFROM\n\t\tps\n), mai_des AS (\n\tINSERT INTO clientes.cliente_emails_de_contacto(\n\t\tid_cliente_emails_de_contacto, id_cliente, email, tipo)\n\tSELECT\n\t\tnextval('clientes.seq_cliente_emails_de_contacto_pk'::regclass), ps.id_cliente_destinatario,\n\t\tps.correo_electronico_destinatario, 'PERSONAL'\n\tFROM\n\t\tps\n), dir AS (\n\tINSERT INTO clientes.cliente_direcciones (\n\t\tid_cliente, calle, numero_exterior, numero_interior, codigo_postal,  \n\t\tid_colonia, id_municipio, id_estado_del_pais, entre_calle_1, entre_calle_2)\n\tSELECT\n\t\tps.id_cliente_destinatario, ps.calle_destinatario, ps.numero_exterior_destinatario, ps.numero_interior_destinatario,\n\t\tps.codigo_postal_destinatario, col.id_catalogo, mpo.id_catalogo, edo.id_catalogo,\n\t\tps.entre_calle_destinatario, ps.y_calle_destinatario\n\tFROM\n\t\tps\n\tINNER JOIN shared.catalogos col ON col.descripcion_catalogo = ps.colonia_destinatario\n\tINNER JOIN shared.catalogos mpo ON mpo.descripcion_catalogo = ps.municipio_destinatario\n\tINNER JOIN shared.catalogos edo ON edo.descripcion_catalogo = ps.estado_destinatario\n\tRETURNING id_direccion_del_cliente, id_cliente\n), ped AS (\n\tINSERT INTO pedidos.pedidos(numero_del_documento, estado_renglon_bitacora, fecha_modificacion, hora_modificacion, \n\t\t\t\t\t\t\t\tfecha_emision, hora_emision, observaciones, id_tipo_entrega, \n\t\t\t\t\t\t\t\tid_cliente_remitente, id_cliente_destinatario, id_direcciones_destinatario, id_tipo_de_act, \n\t\t\t\t\t\t\t\tid_tipo_de_documento, id_periodicidad, id_tienda_y_locacion_destino, id_tienda_y_locacion_surte,\n\t\t\t\t\t\t\t\tfecha_de_compra, id_frecuencia_visita, orden_original,estado_orden)\n\tSELECT DISTINCT\n\t\tps.numero_del_documento, ps.estado_por_linea, ps.fecha_actualizacion_estado, ps.hora_actualizacion_estado, \n\t\tps.fecha_emision, ps.hora_emision, ps.observaciones, ent.id_catalogo,\n\t\tps.id_cliente_remitente, ps.id_cliente_destinatario, dir.id_direccion_del_cliente, act.id_catalogo,\n\t\tdoc.id_catalogo, per.id_catalogo, ps.locacion_destino, ps.locacion_que_surte,\n\t\tps.fecha_de_compra, fre.id_catalogo, ps.orden_original, ''\n\tFROM ps\n\tINNER JOIN dir ON ps.id_cliente_destinatario = dir.id_cliente\n\tINNER JOIN shared.catalogos ent ON ent.descripcion_catalogo = ps.id_tipo_entrega\n\tINNER JOIN shared.catalogos act ON act.descripcion_catalogo = ps.id_tipo_act\n\tINNER JOIN shared.catalogos doc ON doc.descripcion_catalogo = ps.id_tipo_documento\n\tINNER JOIN shared.catalogos per ON per.descripcion_catalogo = ps.periodicidad\n\tINNER JOIN shared.catalogos fre ON fre.descripcion_catalogo = ps.frecuencia_visita\n)\nINSERT INTO pedidos.pedidos_detalle_sku(\n\tid_locacion_surte, fecha_recalculada, indicador_marketplace, cantidad_entregada, \n\tfecha_de_surtido, cantidad_recogida_orden_de_venta, hora_actualizacion_estado, \n\tnumero_de_intentos_de_entrega, fecha_actualizacion_estado, usuario_actualizador_de_estado, \n\tproveedor_de_mensajeria, fecha_rango_promesa_de_entrega, piezas, id_causa_de_noentrega, \n\tfecha_real_de_entrega, cantidad_cancelada, numero_de_guia)\n\tSELECT ps.locacion_que_surte, ps.fecha_recalculada, ps.indicador_mkp, ps.cantidad_entregada,\n\tps.fecha_surtido, ps.cantidad_recogida, ps.hora_actualizacion_estado, ps.numero_de_intentos_de_entrega,\n\tps.fecha_actualizacion_estado, ps.usuario_actualizador_estado, ps.proveedor_de_mensajeria,\n\tps.fecha_rango_promesa_entrega, ps.piezas, nen.id_catalogo, ps.fecha_real_entrega,\n\tps.cantidad_cancelada, ps.numero_de_guia\n\tFROM ps\n\tINNER JOIN shared.catalogos nen ON nen.descripcion_catalogo = ps.causa_no_entrega\n",
+                        "connectionArguments": "currentSchema=staging"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "DBTransform",
+                "type": "action",
+                "label": "DBTransform",
+                "icon": "icon-database"
+            },
+            {
+                "name": "ErrorFile",
+                "plugin": {
+                    "name": "GCS",
+                    "type": "batchsink",
+                    "label": "ErrorFile",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "project": "auto-detect",
+                        "suffix": "yyyy-MM-dd-HH-mm",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "location": "us",
+                        "schema": "{\"type\":\"record\",\"name\":\"errortext\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}",
+                        "referenceName": "pedidos-soms-error",
+                        "path": "${error_uri}",
+                        "format": "csv",
+                        "delimiter": ","
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"errortext\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}",
+                "inputSchema": [
+                    {
+                        "name": "ErrorCollector",
+                        "schema": "{\"type\":\"record\",\"name\":\"errortext\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"msg\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"int\"},{\"name\":\"node\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "ErrorFile",
+                "type": "batchsink",
+                "label": "ErrorFile",
+                "icon": "fa-plug"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Pipeline de ingesta batch de pedidos SOMS, remisiones y órdenes de compra.",
+        "maxConcurrentRuns": 1
+    }
+}

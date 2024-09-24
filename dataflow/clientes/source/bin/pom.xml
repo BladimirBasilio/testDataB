@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright (C) 2017 Google Inc.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  ~ use this file except in compliance with the License. You may obtain a copy of
+  ~ the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  ~ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  ~ License for the specific language governing permissions and limitations under
+  ~ the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.liverpool.stream.ingestion</groupId>
+  <artifactId>fundacional</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <properties>
+  	<beam.version>2.28.0</beam.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+    <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
+    <slf4j.version>1.7.25</slf4j.version>
+  </properties>
+
+    <repositories>
+    <repository>
+      <id>apache.snapshots</id>
+      <name>Apache Development Snapshot Repository</name>
+      <url>https://repository.apache.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <build>
+      <!-- Include file depending if execution is:
+    	 GCP -> application.properties
+    	 Local -> application1.properties							
+    L Local , without L GCP. -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>application.properties</include>
+        </includes>
+      </resource>
+	</resources>
+   <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+           <!-- Exclude files depending if execution is:
+    	 		GCP -> exclude RegistroBoletaLPipeline.java, RegistroBoletaLOptions.java
+    	 		Local -> exclude RegistroBoletaPipeline.java, RegistroBoletaOptions.java							
+    	  		L Local , without L GCP. -->
+          <excludes>
+               <exclude>**/com/liverpool/stream/ingestion/fundacional/clientes/dataflow/RegistraClienteLPipeline.java</exclude>
+               <exclude>**/com/liverpool/stream/ingestion/fundacional/clientes/dataflow/option/RegistraClienteLOptions.java</exclude>
+               <exclude>**/com/liverpool/stream/ingestion/fundacional/clientes/dataflow/utils/CargaConfiguracionesLPipeline.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>${exec-maven-plugin.version}</version>
+          <configuration>
+            <cleanupDaemonThreads>false</cleanupDaemonThreads>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+  </build>
+
+<profiles>
+		<profile>
+			<id>direct-runner</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<!-- Makes the DirectRunner available when running a pipeline. -->
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.beam</groupId>
+					<artifactId>beam-runners-direct-java</artifactId>
+					<version>${beam.version}</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.beam</groupId>
+					<artifactId>beam-sdks-java-io-jdbc</artifactId>
+					<version>${beam.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.beam</groupId>
+					<artifactId>beam-sdks-java-core</artifactId>
+					<version>${beam.version}</version>
+				</dependency>
+				 <dependency>
+				      <groupId>org.apache.beam</groupId>
+				      <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
+				      <version>${beam.version}</version>
+			    </dependency>
+			    <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+				<dependency>
+				    <groupId>org.postgresql</groupId>
+				    <artifactId>postgresql</artifactId>
+				    <version>42.2.9</version>
+				</dependency>
+				    <!-- slf4j API frontend binding with JUL backend -->
+			    <dependency>
+			      <groupId>org.slf4j</groupId>
+			      <artifactId>slf4j-api</artifactId>
+			      <version>${slf4j.version}</version>
+			    </dependency>
+			    <dependency>
+			      <groupId>org.slf4j</groupId>
+			      <artifactId>slf4j-jdk14</artifactId>
+			      <version>${slf4j.version}</version>
+			    </dependency>
+			    	<!-- Configuration -->
+				<dependency>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-configuration2</artifactId>
+					<version>2.2</version>
+				</dependency>
+				<dependency>
+					<groupId>commons-beanutils</groupId>
+					<artifactId>commons-beanutils</artifactId>
+					<version>1.9.3</version>
+				</dependency>
+					<!-- Serialization json Date Time -->
+				<dependency>
+				    <groupId>com.fasterxml.jackson.datatype</groupId>
+				    <artifactId>jackson-datatype-jsr310</artifactId>
+				    <version>2.11.1</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>dataflow-runner</id>
+			<!-- Makes the DataflowRunner available when running a pipeline.  -->
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.beam</groupId>
+					<artifactId>beam-runners-google-cloud-dataflow-java</artifactId>
+					<version>${beam.version}</version>
+					<scope>compile</scope>
+				</dependency>
+			<!-- https://mvnrepository.com/artifact/org.apache.beam/beam-sdks-java-extensions-google-cloud-platform-core -->
+			<dependency>
+			    <groupId>org.apache.beam</groupId>
+			    <artifactId>beam-sdks-java-extensions-google-cloud-platform-core</artifactId>
+			    <version>${beam.version}</version>
+			</dependency>
+			<dependency>
+					<groupId>org.apache.beam</groupId>
+					<artifactId>beam-sdks-java-io-jdbc</artifactId>
+					<version>${beam.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.beam</groupId>
+					<artifactId>beam-sdks-java-core</artifactId>
+					<version>${beam.version}</version>
+				</dependency>
+				 <dependency>
+				      <groupId>org.apache.beam</groupId>
+				      <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
+				      <version>${beam.version}</version>
+			    </dependency>
+			    <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+				<dependency>
+				    <groupId>org.postgresql</groupId>
+				    <artifactId>postgresql</artifactId>
+				    <version>42.2.9</version>
+				</dependency>
+				    <!-- slf4j API frontend binding with JUL backend -->
+			    <dependency>
+			      <groupId>org.slf4j</groupId>
+			      <artifactId>slf4j-api</artifactId>
+			      <version>${slf4j.version}</version>
+			    </dependency>
+			    <dependency>
+			      <groupId>org.slf4j</groupId>
+			      <artifactId>slf4j-jdk14</artifactId>
+			      <version>${slf4j.version}</version>
+			    </dependency>
+				<!-- Configuration -->
+				<dependency>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-configuration2</artifactId>
+					<version>2.2</version>
+				</dependency>
+				<dependency>
+					<groupId>commons-beanutils</groupId>
+					<artifactId>commons-beanutils</artifactId>
+					<version>1.9.3</version>
+				</dependency>
+				<!-- Serialization json Date Time -->
+				<dependency>
+				    <groupId>com.fasterxml.jackson.datatype</groupId>
+				    <artifactId>jackson-datatype-jsr310</artifactId>
+				    <version>2.11.1</version>
+				</dependency>
+				<!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-secretmanager -->
+				<dependency>
+				    <groupId>com.google.cloud</groupId>
+				    <artifactId>google-cloud-secretmanager</artifactId>
+				    <version>1.2.3</version>
+				</dependency>
+				<!-- https://mvnrepository.com/artifact/com.google.cloud.sql/postgres-socket-factory  -->
+				<dependency>
+				    <groupId>com.google.cloud.sql</groupId>
+				    <artifactId>postgres-socket-factory</artifactId>
+				    <version>1.0.16</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>	
+</project>

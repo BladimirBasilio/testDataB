@@ -1,0 +1,72 @@
+#propiedades para ejecucion con directrunner
+#GCP properties
+gcp.projectId=${CDP_PROJECT_ID}
+
+# Dataflow properties
+gcp.df.registra.pedido.appName=${DATAFLOW_JOB_NAME}
+gcp.df.service.account=${SA_DATAFLOW_NAME}
+gcp.df.region=${REGION}
+gcp.df.temp=gs://${DATAFLOW_BUCKET_NAME}/temp
+gcp.df.staging=gs://${DATAFLOW_BUCKET_NAME}/staging
+gcp.df.maxWorkers=${DATAFLOW_MAX_WORKERS}
+gcp.df.usePublicIps=false
+gcp.df.network=https://www.googleapis.com/compute/v1/projects/${VPC_SHARED_PROJECT_ID}/global/networks/${VPC_SHARED_ID}
+gcp.df.subnetwork=https://www.googleapis.com/compute/v1/projects/${VPC_SHARED_PROJECT_ID}/regions/us-east4/subnetworks/${SUBNET_SHARED_ID}
+gcp.df.machineType=${INSTANCE_TYPE}
+#gcp.df.networkTags=use_network_tags=postgres-internal
+gcp.df.update=false
+gcp.df.diskSize=50
+
+# Pub/Sub properties
+gcp.pubsub.topic.registra.pedido=projects/${CDP_PROJECT_ID}/topics/${TOPIC_PEDIDO}
+gcp.pubsub.topic.subscription.registra.pedido=projects/${CDP_PROJECT_ID}/subscriptions/${SUB_TOPIC_PEDIDO}
+gcp.pubsub.topic.boleta.vinculacion=${TOPIC_VINCULACION}
+
+#JDBC properties
+jdbc.driver=org.postgresql.Driver
+#jdbc.url=jdbc:postgresql://172.29.96.3:5432/cdp_v2_4_A
+jdbc.insert.query.pedidos.pedidos=SELECT * FROM pedidos.pedidos_crud(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+jdbc.insert.query.pedidos.pedidos.detalle.sku=SELECT * FROM pedidos.pedidos_detalle_sku_crud(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+jdbc.insert.query.clientes.clientes=SELECT * FROM clientes.clientes_crud (?, ?, ?, ?, ?, ?, ?, ?)
+jdbc.insert.query.clientes.cliente.direcciones=select * from clientes.cliente_direcciones_crud(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+jdbc.insert.query.clientes.cliente.emails.contacto=SELECT * FROM clientes.cliente_emails_de_contacto_crud (?, ?, ?, ?, ?)
+jdbc.insert.query.clientes.cliente.telefonos.contacto=SELECT * FROM clientes.cliente_telefonos_de_contacto_crud (?, ?, ?, ?, ?, ?)
+jdbc.insert.query.clientes.cliente.ids=SELECT * FROM clientes.cliente_ids_crud (?, ?, ? , ?, ?)
+
+#connection pool
+connection.pool.max.size=${CONNECTION_POOL_MAX_SIZE}
+connection.pool.min.idle=${CONNECTION_POOL_MIN_IDLE}
+connection.pool.timeout=${CONNECTION_POOL_TIMEOUT}
+connection.pool.idle.timeout=${CONNECTION_POOL_IDLE_TIMEOUT}
+connection.pool.max.lifetime=${CONNECTION_POOL_MAX_LIFETIME}
+
+#secret manager
+gcp.sm.jdbc.user=${DATABASE_USER}
+gcp.sm.jdbc.password=${DATABASE_PASSWORD}
+gcp.sm.jdbc.database=${DATABASE_NAME}
+gcp.sm.jdbc.instance.name=${DATABASE_INSTANCE_NAME}
+gcp.sm.jdbc.user.version=latest
+gcp.sm.jdbc.password.version=latest
+gcp.sm.jdbc.database.version=latest
+gcp.sm.jdbc.instance.name.version=latest
+jdbc.sm.url=jdbc:postgresql:///{database-name}
+
+mym.url=${MYM_URL}
+mym.services.timeout.connect=${MYM_SERVICE_TIMEOUTCONNECT}
+mym.services.endpoint=v2/clients/services/confirmed/
+
+#REDIS
+spring.redis.host=${REDIS_HOST}
+spring.redis.port=${REDIS_PORT}
+spring.redis.password=${REDIS_PW}
+spring.redis.expire.key=${REDIS_EXPIRE_KEY}
+# Connection timeout unit: ms (MS)
+spring.redis.timeout=${REDIS_TIMEOUT}
+# The maximum idle connection in the connection pool. The default value is 8
+spring.redis.jedis.pool.max-idle=${REDIS_POLL_MAX_IDLE}
+#The minimum idle connection in the connection pool. The default value is also 0
+spring.redis.jedis.pool.min-idle=${REDIS_POOL_MIN_IDLE}
+# The maximum number of jedis instances in the connection pool. If the value is - 1, it means unlimited; if the pool has been fully allocated, the status will become exhausted.
+spring.redis.jedis.pool.max-active=${REDIS_POOL_MAX_ACTIVE}
+# The maximum waiting time of available connections, in milliseconds. The default value is - 1, which means never timeout. If the timeout occurs, the JedisConnectionException is thrown directly
+spring.redis.jedis.pool.max-wait=${REDIS_POOL_MAX_WAIT}

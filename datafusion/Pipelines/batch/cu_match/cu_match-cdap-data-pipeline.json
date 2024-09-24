@@ -1,0 +1,256 @@
+{
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "description": "Data Pipeline Application",
+    "name": "ingestion_cu_match_v5",
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "cu_match_file",
+                "to": "w_cu_match"
+            },
+            {
+                "from": "w_cu_match",
+                "to": "tmp_insert"
+            },
+            {
+                "from": "w_cu_match",
+                "to": "ErrorCollector"
+            },
+            {
+                "from": "tmp_insert",
+                "to": "insert_into_actual_db"
+            },
+            {
+                "from": "ErrorCollector",
+                "to": "ErrorFile"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "cu_match_file",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "cu_match_file",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "filenameOnly": "false",
+                        "copyHeader": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                        "path": "${input_path}",
+                        "format": "text",
+                        "project": "clever-guard-306611",
+                        "recursive": "false",
+                        "referenceName": "ilan-data-fusion.CDP_DWH_INB_CU_MATCH_02122021.dat",
+                        "skipHeader": "false",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "encrypted": "false",
+                        "fileEncoding": "UTF-8"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                "id": "cu_match_file"
+            },
+            {
+                "name": "w_cu_match",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "w_cu_match",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "a8637557-1de5-4207-8bfa-3e1a0ac95f34",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9\nrename body_1 rowid\nrename body_4 componente\nrename body_7 bandera_cu\nrename body_10 cu_track\nset-type :componente long\nset-type :bandera_cu integer",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"rowid\",\"type\":[\"string\",\"null\"]},{\"name\":\"componente\",\"type\":[\"long\",\"null\"]},{\"name\":\"bandera_cu\",\"type\":[\"int\",\"null\"]},{\"name\":\"cu_track\",\"type\":[\"string\",\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "on-error": "skip-error"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"rowid\",\"type\":[\"string\",\"null\"]},{\"name\":\"componente\",\"type\":[\"long\",\"null\"]},{\"name\":\"bandera_cu\",\"type\":[\"int\",\"null\"]},{\"name\":\"cu_track\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "cu_match_file",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "w_cu_match"
+            },
+            {
+                "name": "tmp_insert",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "tmp_insert",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "ingestion_cu_match",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${connection_string}",
+                        "tableName": "cu_match",
+                        "columns": "rowid,componente,bandera_cu,cu_track",
+                        "user": "${secure(db_username)}",
+                        "password": "${secure(db_password)}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"rowid\",\"type\":[\"string\",\"null\"]},{\"name\":\"componente\",\"type\":[\"long\",\"null\"]},{\"name\":\"bandera_cu\",\"type\":[\"int\",\"null\"]},{\"name\":\"cu_track\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "w_cu_match",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"rowid\",\"type\":[\"string\",\"null\"]},{\"name\":\"componente\",\"type\":[\"long\",\"null\"]},{\"name\":\"bandera_cu\",\"type\":[\"int\",\"null\"]},{\"name\":\"cu_track\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "id": "tmp_insert"
+            },
+            {
+                "name": "ErrorCollector",
+                "plugin": {
+                    "name": "ErrorCollector",
+                    "type": "errortransform",
+                    "label": "ErrorCollector",
+                    "artifact": {
+                        "name": "core-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "messageField": "msg",
+                        "codeField": "code",
+                        "stageField": "node"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "w_cu_match",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "ErrorCollector"
+            },
+            {
+                "name": "insert_into_actual_db",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "insert_into_actual_db",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${connection_string}",
+                        "query": "WITH cu_match_tmp AS (\n\tSELECT * FROM staging.cu_match\n)\nINSERT INTO clientes.clientes_merge (id_cliente_unico, rowid, id_cliente, bandera_cu, cu_track, componente)\nSELECT DISTINCT nextval('clientes.seq_clientes_merge_pk'), cu_match_tmp.rowid, cl.id_cliente, cu_match_tmp.bandera_cu, cu_match_tmp.cu_track, componente\nFROM cu_match_tmp\nINNER JOIN clientes.clientes cl ON cl.row_id = cu_match_tmp.rowid",
+                        "user": "${secure(db_username)}",
+                        "password": "${secure(db_password)}",
+                        "connectionArguments": "currentSchema=clientes",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "insert_into_actual_db"
+            },
+            {
+                "name": "ErrorFile",
+                "plugin": {
+                    "name": "GCS",
+                    "type": "batchsink",
+                    "label": "ErrorFile",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "cu-match-error",
+                        "project": "auto-detect",
+                        "path": "${error_uri}",
+                        "suffix": "yyyy-MM-dd-HH-mm",
+                        "format": "csv",
+                        "delimiter": ",",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "location": "us",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "ErrorCollector",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "ErrorFile"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Data Pipeline Application",
+        "maxConcurrentRuns": 1
+    }
+}

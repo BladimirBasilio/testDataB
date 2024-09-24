@@ -1,0 +1,74 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+timeout: 1200s
+steps:
+  - id: 'setup'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: /bin/bash
+    args:
+      - "-c"
+      - |
+        set -e
+        apt-get update; apt-get install -y gettext-base
+        cat ./${_FOLDER}/source/src/main/resources/properties.template | envsubst > ./${_FOLDER}/source/src/main/resources/application.properties
+    env:
+      - "CDP_PROJECT_ID=$_CDP_PROJECT_ID"
+      - "REGION=${_DEFAULT_REGION}"
+      - "DATAFLOW_BUCKET_NAME=$_DATAFLOW_BUCKET_NAME"
+      - "SA_DATAFLOW_NAME=${_SA_DATAFLOW_NAME}"
+      - "VPC_SHARED_PROJECT_ID=${_VPC_SHARED_PROJECT_ID}"
+      - "VPC_SHARED_ID=${_VPC_SHARED_ID}"
+      - "SUBNET_SHARED_ID=${_SUBNET_SHARED_ID}"
+      - "INSTANCE_TYPE=${_INSTANCE_TYPE}"
+      - "TOPIC_CLIENTE=${_TOPIC_CLIENTE}"
+      - "TOPIC_HASH=${_TOPIC_HASH}"
+      - "SUB_TOPIC_CLIENTE=${_SUB_TOPIC_CLIENTE}"
+      - "TOPIC_INSERT_MYM=${_TOPIC_INSERT_MYM}"
+      - "SUB_TOPIC_INSERT_MYM=${_SUB_TOPIC_INSERT_MYM}"
+      - "DATABASE_USER=${_DATABASE_USER}"
+      - "DATABASE_PASSWORD=${_DATABASE_PASSWORD}"
+      - "DATABASE_NAME=${_DATABASE_NAME}"
+      - "DATABASE_INSTANCE_NAME=${_DATABASE_INSTANCE_NAME}"
+      - "DATAFLOW_JOB_NAME=${_DATAFLOW_JOB_NAME}"
+      - "DATAFLOW_MAX_WORKERS=${_DATAFLOW_MAX_WORKERS}"
+      - "CONNECTION_POOL_MAX_SIZE=${_CONNECTION_POOL_MAX_SIZE}"
+      - "CONNECTION_POOL_MIN_IDLE=${_CONNECTION_POOL_MIN_IDLE}"
+      - "CONNECTION_POOL_TIMEOUT=${_CONNECTION_POOL_TIMEOUT}"
+      - "CONNECTION_POOL_IDLE_TIMEOUT=${_CONNECTION_POOL_IDLE_TIMEOUT}"
+      - "CONNECTION_POOL_MAX_LIFETIME=${_CONNECTION_POOL_MAX_LIFETIME}"
+
+  - id: "Run Job"
+    name: "gcr.io/${_CDP_PROJECT_ID}/maven:3.6-jdk-8-custom"
+    entrypoint: /bin/bash
+    args:
+      - -c
+      - |
+        gcloud config set auth/impersonate_service_account ${_SA_TERRAFORM}
+        mkdir /var/run/secret
+        gcloud secrets versions access latest --secret=dataflow-sa-secret --project ${_CDP_PROJECT_ID} > /var/run/secret/dataflow-runner.json
+        export GOOGLE_APPLICATION_CREDENTIALS=/var/run/secret/dataflow-runner.json
+        cd ${_FOLDER}
+        ./build/run_job.sh
+    env:
+      - "SA_NAME=${_SA_DATAFLOW_NAME}"
+      - "PROJECT_ID=${_CDP_PROJECT_ID}"
+      - "REGION=${_DEFAULT_REGION}"
+      - "DATAFLOW_JOB_NAME=${_DATAFLOW_JOB_NAME}"
+
+substitutions:
+  _CONNECTION_POOL_MAX_SIZE: "20"
+  _CONNECTION_POOL_MIN_IDLE: "10"
+  _CONNECTION_POOL_TIMEOUT: "240000"
+  _CONNECTION_POOL_IDLE_TIMEOUT: "10000"
+  _CONNECTION_POOL_MAX_LIFETIME: "300000"

@@ -1,0 +1,3167 @@
+{
+    "name": "batch_jerarquia_producto_v25",
+    "description": "Pipeline batch para Jerarquía de Producto",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "GCSFile",
+                "to": "is_proveedores"
+            },
+            {
+                "from": "is_proveedores",
+                "to": "WProveedores",
+                "condition": true
+            },
+            {
+                "from": "is_proveedores",
+                "to": "is_marcas",
+                "condition": false
+            },
+            {
+                "from": "WProveedores",
+                "to": "LProveedores"
+            },
+            {
+                "from": "is_marcas",
+                "to": "WMarcas",
+                "condition": true
+            },
+            {
+                "from": "is_marcas",
+                "to": "is_direcciones",
+                "condition": false
+            },
+            {
+                "from": "WMarcas",
+                "to": "LMarcas"
+            },
+            {
+                "from": "LMarcas",
+                "to": "TMarcas"
+            },
+            {
+                "from": "is_direcciones",
+                "to": "WDirecciones",
+                "condition": true
+            },
+            {
+                "from": "is_direcciones",
+                "to": "is_secciones",
+                "condition": false
+            },
+            {
+                "from": "WDirecciones",
+                "to": "LDirecciones"
+            },
+            {
+                "from": "LDirecciones",
+                "to": "TDirecciones"
+            },
+            {
+                "from": "is_secciones",
+                "to": "WSecciones",
+                "condition": true
+            },
+            {
+                "from": "is_secciones",
+                "to": "is_submarcas",
+                "condition": false
+            },
+            {
+                "from": "WSecciones",
+                "to": "LSecciones"
+            },
+            {
+                "from": "LSecciones",
+                "to": "TSecciones"
+            },
+            {
+                "from": "is_submarcas",
+                "to": "WSubmarcas",
+                "condition": true
+            },
+            {
+                "from": "is_submarcas",
+                "to": "is_bigticket",
+                "condition": false
+            },
+            {
+                "from": "WSubmarcas",
+                "to": "LSubmarcas"
+            },
+            {
+                "from": "LSubmarcas",
+                "to": "TSubmarcas"
+            },
+            {
+                "from": "is_bigticket",
+                "to": "WBigticket",
+                "condition": true
+            },
+            {
+                "from": "is_bigticket",
+                "to": "is_clases",
+                "condition": false
+            },
+            {
+                "from": "WBigticket",
+                "to": "LBigticket"
+            },
+            {
+                "from": "is_clases",
+                "to": "WClases",
+                "condition": true
+            },
+            {
+                "from": "is_clases",
+                "to": "is_servicios",
+                "condition": false
+            },
+            {
+                "from": "WClases",
+                "to": "TClases"
+            },
+            {
+                "from": "TClases",
+                "to": "LClases"
+            },
+            {
+                "from": "is_servicios",
+                "to": "WAplicaServicios",
+                "condition": true
+            },
+            {
+                "from": "is_servicios",
+                "to": "is_tallas",
+                "condition": false
+            },
+            {
+                "from": "WAplicaServicios",
+                "to": "LAplicaServicios"
+            },
+            {
+                "from": "LAplicaServicios",
+                "to": "TAplicaServicios"
+            },
+            {
+                "from": "is_tallas",
+                "to": "WTallas",
+                "condition": true
+            },
+            {
+                "from": "is_tallas",
+                "to": "is_mundo_negocios",
+                "condition": false
+            },
+            {
+                "from": "WTallas",
+                "to": "LTallas"
+            },
+            {
+                "from": "LTallas",
+                "to": "TTallas"
+            },
+            {
+                "from": "is_mundo_negocios",
+                "to": "WMundoNegocio",
+                "condition": true
+            },
+            {
+                "from": "is_mundo_negocios",
+                "to": "is_grupos",
+                "condition": false
+            },
+            {
+                "from": "WMundoNegocio",
+                "to": "LMundoNegocio"
+            },
+            {
+                "from": "LMundoNegocio",
+                "to": "TMundoNegocio"
+            },
+            {
+                "from": "is_grupos",
+                "to": "WGrupos",
+                "condition": true
+            },
+            {
+                "from": "is_grupos",
+                "to": "is_colores",
+                "condition": false
+            },
+            {
+                "from": "WGrupos",
+                "to": "LGrupos"
+            },
+            {
+                "from": "LGrupos",
+                "to": "TGrupos"
+            },
+            {
+                "from": "is_colores",
+                "to": "WColores",
+                "condition": true
+            },
+            {
+                "from": "is_colores",
+                "to": "is_productos",
+                "condition": false
+            },
+            {
+                "from": "WColores",
+                "to": "LColores"
+            },
+            {
+                "from": "LColores",
+                "to": "TColores"
+            },
+            {
+                "from": "is_productos",
+                "to": "WProductos",
+                "condition": true
+            },
+            {
+                "from": "WProductos",
+                "to": "LProductos"
+            },
+            {
+                "from": "LProductos",
+                "to": "TProductos"
+            },
+            {
+                "from": "is_productos",
+                "to": "is_comprador_corp",
+                "condition": "false"
+            },
+            {
+                "from": "is_comprador_corp",
+                "to": "WCompradorCorporativo",
+                "condition": "true"
+            },
+            {
+                "from": "WCompradorCorporativo",
+                "to": "LCompradorCorporativo"
+            },
+            {
+                "from": "LCompradorCorporativo",
+                "to": "TCompradorCorporativo"
+            },
+            {
+                "from": "is_comprador_corp",
+                "to": "is_empresa",
+                "condition": "false"
+            },
+            {
+                "from": "is_empresa",
+                "to": "is_familia_negocio",
+                "condition": "false"
+            },
+            {
+                "from": "is_familia_negocio",
+                "to": "is_pais",
+                "condition": "false"
+            },
+            {
+                "from": "is_pais",
+                "to": "is_rango_precio",
+                "condition": "false"
+            },
+            {
+                "from": "is_rango_precio",
+                "to": "is_categoria_sku",
+                "condition": "false"
+            },
+            {
+                "from": "is_categoria_sku",
+                "to": "is_status_sku",
+                "condition": "false"
+            },
+            {
+                "from": "is_status_sku",
+                "to": "is_temporadas",
+                "condition": "false"
+            },
+            {
+                "from": "is_temporadas",
+                "to": "WTemporadas",
+                "condition": "true"
+            },
+            {
+                "from": "WTemporadas",
+                "to": "LTemporadas"
+            },
+            {
+                "from": "LTemporadas",
+                "to": "TTemporadas"
+            },
+            {
+                "from": "is_temporadas",
+                "to": "WTipoNegocio",
+                "condition": "false"
+            },
+            {
+                "from": "WTipoNegocio",
+                "to": "LTipoNegocio"
+            },
+            {
+                "from": "LTipoNegocio",
+                "to": "TTipoNegocio"
+            },
+            {
+                "from": "is_status_sku",
+                "to": "WStatusSKU",
+                "condition": "true"
+            },
+            {
+                "from": "WStatusSKU",
+                "to": "LStatusSKU"
+            },
+            {
+                "from": "LStatusSKU",
+                "to": "TStatusSKU"
+            },
+            {
+                "from": "is_categoria_sku",
+                "to": "WCategoriaSKU",
+                "condition": "true"
+            },
+            {
+                "from": "WCategoriaSKU",
+                "to": "LCategoriaSKU"
+            },
+            {
+                "from": "LCategoriaSKU",
+                "to": "TCategoriaSKU"
+            },
+            {
+                "from": "is_rango_precio",
+                "to": "WRangoPrecio",
+                "condition": "true"
+            },
+            {
+                "from": "WRangoPrecio",
+                "to": "LRangoPrecio"
+            },
+            {
+                "from": "LRangoPrecio",
+                "to": "TRangoPrecio"
+            },
+            {
+                "from": "is_pais",
+                "to": "WPais",
+                "condition": "true"
+            },
+            {
+                "from": "WPais",
+                "to": "LPais"
+            },
+            {
+                "from": "LPais",
+                "to": "TPais"
+            },
+            {
+                "from": "is_familia_negocio",
+                "to": "WFamiliaNegocio",
+                "condition": "true"
+            },
+            {
+                "from": "WFamiliaNegocio",
+                "to": "LFamiliaNegocio"
+            },
+            {
+                "from": "LFamiliaNegocio",
+                "to": "TFamiliaNegocio"
+            },
+            {
+                "from": "is_empresa",
+                "to": "WEmpresa",
+                "condition": "true"
+            },
+            {
+                "from": "WEmpresa",
+                "to": "LEmpresa"
+            },
+            {
+                "from": "LEmpresa",
+                "to": "TEmpresa"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "GCSFile",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "GCSFile",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "filenameOnly": "false",
+                        "copyHeader": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                        "path": "${input_uri}",
+                        "serviceFilePath": "auto-detect",
+                        "format": "text",
+                        "project": "auto-detect",
+                        "recursive": "false",
+                        "referenceName": "gcs-cdp-producto.CDP_DWH_INB",
+                        "skipHeader": "false",
+                        "serviceAccountType": "filePath",
+                        "encrypted": "false",
+                        "fileEncoding": "UTF-8"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                "id": "GCSFile"
+            },
+            {
+                "name": "is_proveedores",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_proveedores",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_PROV_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "GCSFile",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_proveedores"
+            },
+            {
+                "name": "WProveedores",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WProveedores",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "381f8062-ff5a-4a9d-9730-fc43986cad4f",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15,body_17,body_18,body_20,body_21,body_23,body_24,body_26,body_27\ntrim body_1\ntrim body_4\ntrim body_7\ntrim body_10\ntrim body_13\ntrim body_16\ntrim body_19\ntrim body_22\ntrim body_25\ntrim body_28\nrename body_1 clave_homologada\nrename body_4 nombre_proveedor\nrename body_10 fecha_ingreso\nrename body_13 referencia\nrename body_16 clave_stt\nrename body_19 tipo_proveedor\nrename body_22 fecha_alta_en_sap\nrename body_25 clase\nrename body_28 fecha_actualizacion\ndrop :body_7\ntrim clave_homologada\ntrim nombre_proveedor\ntrim fecha_ingreso\ntrim referencia\ntrim clave_stt\ntrim tipo_proveedor\ntrim fecha_alta_en_sap\ntrim clase\ntrim fecha_actualizacion\nparse-as-simple-date :fecha_ingreso yyyy-MM-dd\nparse-as-simple-date :fecha_alta_en_sap yyyy-MM-dd\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"nombre_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_ingreso\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_stt\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_alta_en_sap\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"clase\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "on-error": "skip-error"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"nombre_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_ingreso\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_stt\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_alta_en_sap\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"clase\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_proveedores",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WProveedores"
+            },
+            {
+                "name": "is_marcas",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_marcas",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_MARCA_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_proveedores",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_marcas"
+            },
+            {
+                "name": "LProveedores",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LProveedores",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-proveedores",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "proveedores",
+                        "columns": "clave_homologada, nombre_proveedor, fecha_ingreso, referencia, clave_stt, tipo_proveedor, fecha_alta_en_sap, clase, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"nombre_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_ingreso\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_stt\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_alta_en_sap\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"clase\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WProveedores",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"nombre_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_ingreso\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"clave_stt\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_alta_en_sap\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"clase\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LProveedores"
+            },
+            {
+                "name": "WMarcas",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WMarcas",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 empresa_sku\nrename body_10 fecha_actualizacion\ntrim clave_homologada\ntrim descripcion\ntrim empresa_sku\ntrim fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"int\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "785482ea-92ac-45f0-988d-01be2faf7d49"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"int\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_marcas",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WMarcas"
+            },
+            {
+                "name": "is_direcciones",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_direcciones",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_DIR_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_marcas",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_direcciones"
+            },
+            {
+                "name": "LMarcas",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LMarcas",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-marcas",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, empresa_sku,fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"join.typeoutput\",\"fields\":[{\"name\":\"id_producto_marcas\",\"type\":[\"int\",\"null\"]},{\"name\":\"descripcion_marca_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_empresa_sku\",\"type\":[\"int\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WMarcas",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"int\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LMarcas"
+            },
+            {
+                "name": "TMarcas",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TMarcas",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.producto_marcas(\n\t\tclave_homologada, descripcion_marca_sku, fecha_actualizacion, id_empresa_sku)\n\tSELECT tmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, emp.id_catalogo\n\tFROM tmp\n\tLEFT JOIN shared.catalogos emp ON emp.clave_homologada = tmp.empresa_sku\n\t\tAND emp.entidad_origen = 'PRODUCTO_EMPRESAS'\n\tON CONFLICT ON CONSTRAINT pk_producto_marcas\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TMarcas"
+            },
+            {
+                "name": "WDirecciones",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WDirecciones",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 empresa_sku\nrename body_10 fecha_actualizacion\ntrim clave_homologada\ntrim descripcion\ntrim empresa_sku\ntrim fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "a2a13da4-0e1f-48d5-a68f-5ae1c031486b"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_direcciones",
+                        "schema": ""
+                    }
+                ],
+                "id": "WDirecciones"
+            },
+            {
+                "name": "is_secciones",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_secciones",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_SEC_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_direcciones",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_secciones"
+            },
+            {
+                "name": "LDirecciones",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LDirecciones",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-direcciones",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, empresa_sku, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WDirecciones",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LDirecciones"
+            },
+            {
+                "name": "TDirecciones",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TDirecciones",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.producto_direcciones(\n\t\tclave_homologada, descripcion_direccion, fecha_actualizacion, id_empresa_sku)\n\tSELECT tmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, emp.id_catalogo\n\tFROM tmp\n\tLEFT JOIN shared.catalogos emp ON emp.clave_homologada = tmp.empresa_sku\n\t\tAND emp.entidad_origen = 'PRODUCTO_EMPRESAS'\n\tON CONFLICT ON CONSTRAINT pk_producto_direcciones\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TDirecciones"
+            },
+            {
+                "name": "WSecciones",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WSecciones",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 empresa_sku\nrename body_10 catalogo_padre\nrename body_13 fecha_actualizacion\ntrim clave_homologada\ntrim descripcion\ntrim empresa_sku\ntrim catalogo_padre\ntrim fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "430edfa4-3634-4595-bbca-a20de9e1ee07"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_secciones",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WSecciones"
+            },
+            {
+                "name": "is_submarcas",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_submarcas",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_SUBMARCA_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_secciones",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_submarcas"
+            },
+            {
+                "name": "LSecciones",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LSecciones",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-secciones",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, empresa_sku, catalogo_padre, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_seccion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_producto_direccion\",\"type\":[\"int\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WSecciones",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LSecciones"
+            },
+            {
+                "name": "TSecciones",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TSecciones",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.producto_secciones(\n\t\tclave_homologada, descripcion_seccion, fecha_actualizacion, id_empresa_sku, id_producto_direccion)\n\tSELECT tmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, emp.id_catalogo, dir.id_producto_direccion\n\tFROM tmp\n\tINNER JOIN shared.catalogos emp ON emp.clave_homologada = tmp.empresa_sku\n\t\tAND emp.entidad_origen = 'PRODUCTO_EMPRESAS'\n\tINNER JOIN shared.producto_direcciones dir ON dir.clave_homologada = tmp.catalogo_padre\n\t\tAND dir.id_empresa_sku = emp.id_catalogo\n\tON CONFLICT ON CONSTRAINT pk_producto_secciones\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TSecciones"
+            },
+            {
+                "name": "WSubmarcas",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WSubmarcas",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 empresa_sku\nrename body_10 catalogo_padre\nrename body_13 fecha_actualizacion\ntrim clave_homologada\ntrim descripcion\ntrim empresa_sku\ntrim catalogo_padre\ntrim fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "8d0bc4ae-7f26-4bf0-9c73-2d4d5b1ed77f"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_submarcas",
+                        "schema": ""
+                    }
+                ],
+                "id": "WSubmarcas"
+            },
+            {
+                "name": "is_bigticket",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_bigticket",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*IND_BTICKET_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_submarcas",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_bigticket"
+            },
+            {
+                "name": "LSubmarcas",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LSubmarcas",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-submarcas",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, empresa_sku, catalogo_padre, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WSubmarcas",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LSubmarcas"
+            },
+            {
+                "name": "TSubmarcas",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TSubmarcas",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.producto_submarcas(\n\t\tclave_homologada, descripcion_submarca, fecha_actualizacion, id_empresa_sku, id_producto_marcas)\n\tSELECT tmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, emp.id_catalogo, mar.id_producto_marcas\n\tFROM tmp\n\tINNER JOIN shared.catalogos emp ON emp.clave_homologada = tmp.empresa_sku\n\t\tAND emp.entidad_origen = 'PRODUCTO_EMPRESAS'\n\tINNER JOIN shared.producto_marcas mar ON mar.clave_homologada = tmp.catalogo_padre\n\t\tAND mar.id_empresa_sku = emp.id_catalogo\n\tON CONFLICT ON CONSTRAINT pk_producto_submarcas\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TSubmarcas"
+            },
+            {
+                "name": "WBigticket",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WBigticket",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 fecha_actualizacion\ntrim clave_homologada\ntrim descripcion_indice_bigticket\ntrim fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd\nrename descripcion descripcion_indice_bigticket",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_indice_bigticket\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "1b68e972-dd2d-4096-967a-a114e27bd6a5"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_indice_bigticket\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_bigticket",
+                        "schema": ""
+                    }
+                ],
+                "id": "WBigticket"
+            },
+            {
+                "name": "is_clases",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_clases",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_CLS_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_bigticket",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_clases"
+            },
+            {
+                "name": "LBigticket",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LBigticket",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-bigticket",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "producto_bigticket",
+                        "columns": "clave_homologada, descripcion_indice_bigticket, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WBigticket",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_indice_bigticket\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LBigticket"
+            },
+            {
+                "name": "WClases",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WClases",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9\ndrop :body_7\ntrim body_1\ntrim body_4\ntrim body_10\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_10 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "893d5711-b9ec-436f-bcb7-921eecc5bdbd"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_clases",
+                        "schema": ""
+                    }
+                ],
+                "id": "WClases"
+            },
+            {
+                "name": "is_servicios",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_servicios",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_NOTSPOT_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_clases",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_servicios"
+            },
+            {
+                "name": "TClases",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "TClases",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-clases",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_carga\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WClases",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "TClases"
+            },
+            {
+                "name": "LClases",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "LClases",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, 'PRODUCTO_CLASES_SKU'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "LClases"
+            },
+            {
+                "name": "WAplicaServicios",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WAplicaServicios",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 empresa_sku\nrename body_10 fecha_actualizacion\ntrim clave_homologada\ntrim descripcion\ntrim empresa_sku\ntrim fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "877bb6e4-052f-4337-acb3-7d10e5044b95"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_servicios",
+                        "schema": ""
+                    }
+                ],
+                "id": "WAplicaServicios"
+            },
+            {
+                "name": "is_tallas",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_tallas",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_TALLA_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_servicios",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_tallas"
+            },
+            {
+                "name": "LAplicaServicios",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LAplicaServicios",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-aplica-servicios",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, empresa_sku, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WAplicaServicios",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LAplicaServicios"
+            },
+            {
+                "name": "TAplicaServicios",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TAplicaServicios",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.producto_aplica_servicios(\n\t\tclave_nospot, descripcion_nospot, id_empresa_sku)\n\tSELECT tmp.clave_homologada, tmp.descripcion, emp.id_catalogo\n\tFROM tmp\n\tLEFT JOIN shared.catalogos emp ON emp.clave_homologada = tmp.empresa_sku\n\t\tAND emp.entidad_origen = 'PRODUCTO_EMPRESAS'\n\tON CONFLICT ON CONSTRAINT pk_producto_aplica_servicios\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TAplicaServicios"
+            },
+            {
+                "name": "WTallas",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WTallas",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15\nrename body_1 clave_homologada\nrename body_4 catalogo_padre\nrename body_7 descripcion\nrename body_10 descripcion_2\nrename body_13 empresa_sku\nrename body_16 fecha_actualizacion\ntrim clave_homologada\ntrim catalogo_padre\ntrim descripcion\ntrim descripcion_2\ntrim empresa_sku\ntrim fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "e9cef0af-13e7-4bd9-84a1-eb6e8f95504e"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_tallas",
+                        "schema": ""
+                    }
+                ],
+                "id": "WTallas"
+            },
+            {
+                "name": "is_mundo_negocios",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_mundo_negocios",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*MUNDO_NEG_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_tallas",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_mundo_negocios"
+            },
+            {
+                "name": "LTallas",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LTallas",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-tallas",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, catalogo_padre, descripcion, descripcion_2, empresa_sku, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WTallas",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LTallas"
+            },
+            {
+                "name": "TTallas",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TTallas",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.producto_tallas(\n\t\tclave_de_talla, descripcion_talla, descripcion_generica_talla, id_empresa_sku,\n\t\tclave_de_talla_sistema_origen, fecha_actualizacion)\n\tSELECT tmp.clave_homologada, tmp.descripcion, tmp.descripcion_2, emp.id_catalogo,\n\t\tcatalogo_padre, fecha_actualizacion\n\tFROM tmp\n\tLEFT JOIN shared.catalogos emp ON emp.clave_homologada = tmp.empresa_sku\n\t\tAND emp.entidad_origen = 'PRODUCTO_EMPRESAS'\n\tON CONFLICT ON CONSTRAINT pk_producto_tallas\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TTallas"
+            },
+            {
+                "name": "WMundoNegocio",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WMundoNegocio",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9\ntrim body_1\ntrim body_4\ntrim body_7\ntrim body_10\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 catalogo_padre\nrename body_10 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "d9529e86-38f3-4e88-8510-e69ce8c7f475"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_mundo_negocios",
+                        "schema": ""
+                    }
+                ],
+                "id": "WMundoNegocio"
+            },
+            {
+                "name": "is_grupos",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_grupos",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*GPO_ART_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_mundo_negocios",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_grupos"
+            },
+            {
+                "name": "LMundoNegocio",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LMundoNegocio",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-mundo-negocio",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion,catalogo_padre,fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_catalogo\",\"type\":[\"string\",\"null\"]},{\"name\":\"flexfield1\",\"type\":[\"string\",\"null\"]},{\"name\":\"flexfield0\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WMundoNegocio",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LMundoNegocio"
+            },
+            {
+                "name": "TMundoNegocio",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TMundoNegocio",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, flexfield1, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, tmp.catalogo_padre, 'PRODUCTO_MUNDO_NEGOCIOS'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TMundoNegocio"
+            },
+            {
+                "name": "WGrupos",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WGrupos",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15,body_17,body_18,body_20,body_21\ntrim body_1\ntrim body_4\ntrim body_7\ntrim body_10\ntrim body_13\ntrim body_16\ntrim body_19\ntrim body_22\nrename body_1 grupo_del_articulo\nrename body_4 descripcion_del_grupo\nrename body_7 empresa_sku\nrename body_10 producto_secciones_sku\nrename body_13 clase_sku\nrename body_16 mundo_negocios\nrename body_19 comprador_corporativo\nrename body_22 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"grupo_del_articulo\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_del_grupo\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_secciones_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"clase_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"mundo_negocios\",\"type\":[\"string\",\"null\"]},{\"name\":\"comprador_corporativo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "7bc1195f-be47-4c2d-8f4c-24bc6bd44f75"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"grupo_del_articulo\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_del_grupo\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_secciones_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"clase_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"mundo_negocios\",\"type\":[\"string\",\"null\"]},{\"name\":\"comprador_corporativo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_grupos",
+                        "schema": ""
+                    }
+                ],
+                "id": "WGrupos"
+            },
+            {
+                "name": "is_colores",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_colores",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_COLOR_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_grupos",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_colores"
+            },
+            {
+                "name": "LGrupos",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LGrupos",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-grupos",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "producto_grupos_tmp",
+                        "columns": "grupo_del_articulo, descripcion_del_grupo, empresa_sku, producto_secciones_sku, clase_sku, mundo_negocios, comprador_corporativo, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"grupo_del_articulo\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_del_grupo\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_secciones_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"clase_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"mundo_negocios\",\"type\":[\"string\",\"null\"]},{\"name\":\"comprador_corporativo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WGrupos",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"grupo_del_articulo\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_del_grupo\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_secciones_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"clase_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"mundo_negocios\",\"type\":[\"string\",\"null\"]},{\"name\":\"comprador_corporativo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LGrupos"
+            },
+            {
+                "name": "TGrupos",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TGrupos",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.producto_grupos_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.producto_grupos(\n    \tid_grupo_del_articulo, descripcion_del_grupo, id_empresa_sku, id_producto_secciones_sku, id_clase_sku, id_mundo_negocios, id_comprador_corporativo, fecha_actualizacion)\n\tSELECT\n\t\ttmp.grupo_del_articulo, tmp.descripcion_del_grupo, emp.id_catalogo, ps.id_producto_seccion_sku, cls.id_catalogo, mn.id_catalogo, cc.id_catalogo, tmp.fecha_actualizacion\n\tFROM tmp\n\tLEFT JOIN shared.catalogos emp ON emp.clave_homologada = tmp.empresa_sku\n\t\tAND emp.entidad_origen = 'PRODUCTO_EMPRESAS'\n\tLEFT JOIN shared.producto_secciones ps ON ps.clave_homologada = tmp.producto_secciones_sku\n\t\tAND ps.id_empresa_sku = emp.id_catalogo\n\tLEFT JOIN shared.catalogos cls ON cls.clave_homologada = tmp.clase_sku\n\t\tAND cls.entidad_origen = 'PRODUCTO_CLASES'\n\tLEFT JOIN shared.catalogos mn ON mn.clave_homologada = tmp.mundo_negocios\n\t\tAND mn.entidad_origen = 'PRODUCTO_MUNDO_NEGOCIO'\n\tLEFT JOIN shared.catalogos cc ON cc.clave_homologada = tmp.comprador_corporativo\n\t\tAND cc.entidad_origen = 'PRODUCTO_COMPRADOR_CORPORATIVO'\n\tON CONFLICT ON CONSTRAINT pk_producto_grupos\n\tDO NOTHING\n)\nUPDATE staging.producto_grupos_tmp\nSET estado = 1\nWHERE id_producto_grupos_tmp IN (\n\tSELECT id_producto_grupos_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TGrupos"
+            },
+            {
+                "name": "WColores",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WColores",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15\ntrim body_1\ntrim body_4\ntrim body_7\ntrim body_10\ntrim body_13\ntrim body_16\nrename body_1 clave_homologada\nrename body_4 catalogo_padre\nrename body_7 descripcion\nrename body_10 descripcion_2\nrename body_13 empresa_sku\nrename body_16 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "869a742d-39cf-42e6-ab96-7778cc55d80c"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_colores",
+                        "schema": ""
+                    }
+                ],
+                "id": "WColores"
+            },
+            {
+                "name": "is_productos",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_productos",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_PRODEXTR_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_colores",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_productos"
+            },
+            {
+                "name": "LColores",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LColores",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-colores",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, catalogo_padre, descripcion, descripcion_2, empresa_sku, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WColores",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"catalogo_padre\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LColores"
+            },
+            {
+                "name": "TColores",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TColores",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n\t\tclave_homologada, flexfield1, descripcion_catalogo, flexfield2, \n\t\tid_catalogo_padre, flexfield0, entidad_origen)\n\tSELECT tmp.clave_homologada, tmp.catalogo_padre, tmp.descripcion, tmp.descripcion_2,\n\t\temp.id_catalogo, tmp.fecha_actualizacion, 'PRODUCTO_COLORES'\n\tFROM tmp\n\tLEFT JOIN shared.catalogos emp ON emp.clave_homologada = tmp.empresa_sku\n\t\tAND emp.entidad_origen = 'PRODUCTO_EMPRESAS'\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TColores"
+            },
+            {
+                "name": "WProductos",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WProductos",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15,body_17,body_18,body_20,body_21,body_23,body_24,body_26,body_27,body_29,body_30,body_32,body_33,body_35,body_36,body_38,body_39,body_41,body_42,body_44,body_45,body_47,body_48,body_50,body_51,body_53,body_54,body_56,body_57,body_59,body_60,body_62,body_63,body_65,body_66,body_68,body_69,body_71,body_72,body_74,body_75,body_77,body_78,body_80,body_81,body_83,body_84,body_86,body_87,body_89,body_90,body_92,body_93,body_95,body_96,body_98,body_99,body_101,body_102\ntrim body_1\ntrim body_4\ntrim body_7\ntrim body_10\ntrim body_13\ntrim body_16\ntrim body_19\ntrim body_22\ntrim body_25\ntrim body_28\ntrim body_31\ntrim body_34\ntrim body_37\ntrim body_40\ntrim body_43\ntrim body_46\ntrim body_49\ntrim body_52\ntrim body_55\ntrim body_58\ntrim body_61\ntrim body_64\ntrim body_67\ntrim body_70\ntrim body_73\ntrim body_76\ntrim body_79\ntrim body_82\ntrim body_85\ntrim body_88\ntrim body_91\ntrim body_94\ntrim body_97\ntrim body_100\ntrim body_103\nrename body_1 id_productos_tmp\nrename body_4 empresa_sku\nrename body_7 id_generico\nrename body_10 texto_adicional\nrename body_13 codigo_de_barras\nrename body_16 descripcion\nrename body_19 descripcion_larga\nrename body_22 producto_nospot\nrename body_25 pais_sku\nrename body_28 estado_sku\nrename body_31 fecha_inicial_registrado\nrename body_34 fecha_modificacion\nrename body_37 producto_grupos\nrename body_40 categoria\nrename body_43 proveedor\nrename body_46 costo\nrename body_49 precio_sugerido\nrename body_52 costo_neto\nrename body_55 precio_venta\nrename body_58 precio_venta_sugerido\nrename body_61 producto_submarcas1\nrename body_64 tipo_producto\nrename body_67 tipo_de_negocio_sku\nrename body_70 id_importacion\nrename body_73 producto_tallas\nrename body_76 producto_colores\nrename body_79 producto_submarcas\nrename body_82 temporada_sku\nrename body_85 rango_precios_sku\nrename body_88 id_lic\nrename body_91 tipo_mercado_sku\nrename body_94 variante_coordinado\nrename body_97 id_coordinado\nrename body_100 descripcion_sector\nrename body_103 fecha_actualizacion\nparse-as-simple-date :fecha_inicial_registrado yyyy-MM-dd\nparse-as-simple-date :fecha_modificacion yyyy-MM-dd\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd\nrename id_productos_tmp clave_homologada",
+                        "on-error": "skip-error",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_generico\",\"type\":[\"string\",\"null\"]},{\"name\":\"texto_adicional\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_de_barras\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_larga\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_nospot\",\"type\":[\"string\",\"null\"]},{\"name\":\"pais_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"estado_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_inicial_registrado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_modificacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"producto_grupos\",\"type\":[\"string\",\"null\"]},{\"name\":\"categoria\",\"type\":[\"string\",\"null\"]},{\"name\":\"proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"costo\",\"type\":[\"float\",\"null\"]},{\"name\":\"precio_sugerido\",\"type\":[\"float\",\"null\"]},{\"name\":\"costo_neto\",\"type\":[\"float\",\"null\"]},{\"name\":\"precio_venta\",\"type\":[\"float\",\"null\"]},{\"name\":\"precio_venta_sugerido\",\"type\":[\"float\",\"null\"]},{\"name\":\"producto_submarcas1\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_producto\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_de_negocio_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_importacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_tallas\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_colores\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_submarcas\",\"type\":[\"string\",\"null\"]},{\"name\":\"temporada_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"rango_precios_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_lic\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_mercado_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"variante_coordinado\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_coordinado\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_sector\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "c5771613-135e-4de1-bce2-de38af07f333"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_generico\",\"type\":[\"string\",\"null\"]},{\"name\":\"texto_adicional\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_de_barras\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_larga\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_nospot\",\"type\":[\"string\",\"null\"]},{\"name\":\"pais_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"estado_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_inicial_registrado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_modificacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"producto_grupos\",\"type\":[\"string\",\"null\"]},{\"name\":\"categoria\",\"type\":[\"string\",\"null\"]},{\"name\":\"proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"costo\",\"type\":[\"float\",\"null\"]},{\"name\":\"precio_sugerido\",\"type\":[\"float\",\"null\"]},{\"name\":\"costo_neto\",\"type\":[\"float\",\"null\"]},{\"name\":\"precio_venta\",\"type\":[\"float\",\"null\"]},{\"name\":\"precio_venta_sugerido\",\"type\":[\"float\",\"null\"]},{\"name\":\"producto_submarcas1\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_producto\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_de_negocio_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_importacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_tallas\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_colores\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_submarcas\",\"type\":[\"string\",\"null\"]},{\"name\":\"temporada_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"rango_precios_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_lic\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_mercado_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"variante_coordinado\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_coordinado\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_sector\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_productos",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WProductos"
+            },
+            {
+                "name": "LProductos",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LProductos",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-productos",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "productos_tmp",
+                        "columns": "clave_homologada, empresa_sku, id_generico, texto_adicional, codigo_de_barras, descripcion, descripcion_larga, producto_nospot, pais_sku, estado_sku, fecha_inicial_registrado, fecha_modificacion, producto_grupos, categoria, proveedor, costo, precio_sugerido, costo_neto, precio_venta, precio_venta_sugerido, producto_submarcas1, tipo_producto, tipo_de_negocio_sku, id_importacion, producto_tallas, producto_colores, producto_submarcas, temporada_sku, rango_precios_sku, id_lic, tipo_mercado_sku, variante_coordinado, id_coordinado, descripcion_sector, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"id_productos_tmp\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_generico\",\"type\":[\"string\",\"null\"]},{\"name\":\"texto_adicional\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_de_barras\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_larga\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_nospot\",\"type\":[\"string\",\"null\"]},{\"name\":\"pais_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"estado_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_inicial_registrado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_modificacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"producto_grupos\",\"type\":[\"string\",\"null\"]},{\"name\":\"categoria\",\"type\":[\"string\",\"null\"]},{\"name\":\"proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"costo\",\"type\":[\"string\",\"null\"]},{\"name\":\"precio_sugerido\",\"type\":[\"string\",\"null\"]},{\"name\":\"costo_neto\",\"type\":[\"string\",\"null\"]},{\"name\":\"precio_venta\",\"type\":[\"string\",\"null\"]},{\"name\":\"precio_venta_sugerido\",\"type\":[\"string\",\"null\"]},{\"name\":\"bigticket\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_producto\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_de_negocio_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_importacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_tallas\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_colores\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_submarcas\",\"type\":[\"string\",\"null\"]},{\"name\":\"temporada_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"rango_precios_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_lic\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_mercado_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"variante_coordinado\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_coordinado\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_sector\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WProductos",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"empresa_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_generico\",\"type\":[\"string\",\"null\"]},{\"name\":\"texto_adicional\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_de_barras\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_larga\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_nospot\",\"type\":[\"string\",\"null\"]},{\"name\":\"pais_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"estado_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_inicial_registrado\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_modificacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"producto_grupos\",\"type\":[\"string\",\"null\"]},{\"name\":\"categoria\",\"type\":[\"string\",\"null\"]},{\"name\":\"proveedor\",\"type\":[\"string\",\"null\"]},{\"name\":\"costo\",\"type\":[\"float\",\"null\"]},{\"name\":\"precio_sugerido\",\"type\":[\"float\",\"null\"]},{\"name\":\"costo_neto\",\"type\":[\"float\",\"null\"]},{\"name\":\"precio_venta\",\"type\":[\"float\",\"null\"]},{\"name\":\"precio_venta_sugerido\",\"type\":[\"float\",\"null\"]},{\"name\":\"producto_submarcas1\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_producto\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_de_negocio_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_importacion\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_tallas\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_colores\",\"type\":[\"string\",\"null\"]},{\"name\":\"producto_submarcas\",\"type\":[\"string\",\"null\"]},{\"name\":\"temporada_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"rango_precios_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_lic\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_mercado_sku\",\"type\":[\"string\",\"null\"]},{\"name\":\"variante_coordinado\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_coordinado\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion_sector\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LProductos"
+            },
+            {
+                "name": "TProductos",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TProductos",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.productos_tmp\n)\nINSERT INTO shared.productos(\n\tclave_homologada, codigo_de_barras, id_generico, descripcion, costo_neto, fecha_modificacion, \n\tid_importacion, id_producto_nospot, descripcion_sector, precio_venta_sugerido, \n\tid_lic, id_coordinado, id_producto_grupos, id_proveedor, precio_venta, precio_sugerido, \n\tid_empresa_sku, id_pais_sku, id_estado_sku, fecha_inicial_registrado, id_producto_tallas, \n\tid_producto_submarcas, texto_adicional, descripcion_larga, \n\tid_tipo_de_negocio_sku, id_producto_colores, id_temporada_sku, \n\tid_tipo_mercado_sku, costo, tipo_producto, fecha_actualizacion, variante_coordinado, \n\tid_categoria, id_producto_submarcas1)\nSELECT tmp.clave_homologada, tmp.codigo_de_barras, tmp.id_generico, tmp.descripcion, tmp.costo_neto, tmp.fecha_modificacion, \n\ttmp.id_importacion, pas.id_producto_aplica_servicios, tmp.descripcion_sector, tmp.precio_venta_sugerido, \n\ttmp.id_lic, tmp.id_coordinado, pg.id_producto_grupo, pro.id_proveedor, tmp.precio_venta, tmp.precio_sugerido, \n\temp.id_catalogo, pai.id_catalogo, edo.id_catalogo, tmp.fecha_inicial_registrado, pt.id_producto_tallas, \n\tps.id_producto_submarcas, tmp.texto_adicional, tmp.descripcion_larga, \n\ttn.id_catalogo, col.id_catalogo, tem.id_catalogo, \n\ttm.id_catalogo, tmp.costo, tmp.tipo_producto, tmp.fecha_actualizacion, tmp.variante_coordinado, \n\tcat.id_catalogo, pb.id_producto_bigticket\nFROM tmp\nINNER JOIN shared.producto_aplica_servicios pas ON pas.clave_nospot = tmp.producto_nospot\nINNER JOIN shared.producto_grupos pg ON pg.id_grupo_del_articulo = tmp.producto_grupos\nINNER JOIN shared.proveedores pro ON pro.clave_homologada = tmp.proveedor\nINNER JOIN shared.producto_tallas pt ON pt.clave_de_talla = tmp.producto_tallas\nINNER JOIN shared.producto_submarcas ps ON ps.clave_homologada = tmp.producto_submarcas\nINNER JOIN shared.producto_bigticket pb ON pb.clave_homologada = tmp.producto_submarcas1\nINNER JOIN shared.catalogos tn ON tn.clave_homologada = tmp.tipo_de_negocio_sku\n\tAND tn.entidad_origen = 'PRODUCTO_TIPOS_DE_NEGOCIO'\nINNER JOIN shared.catalogos col ON col.clave_homologada = tmp.producto_colores\n\tAND col.entidad_origen = 'PRODUCTO_COLORES'\nINNER JOIN shared.catalogos tem ON tem.clave_homologada = tmp.temporada_sku\n\tAND tem.entidad_origen = 'PRODUCTO_TEMPORADAS'\nINNER JOIN shared.catalogos tm ON tm.clave_homologada = tmp.tipo_mercado_sku\n\tAND tm.entidad_origen = 'PRODUCTO_TIPOS_DE_MERCADO'\nINNER JOIN shared.catalogos cat ON cat.clave_homologada = tmp.categoria\n\tAND cat.entidad_origen = 'PRODUCTO_CATEGORIAS'\nINNER JOIN shared.catalogos emp ON emp.clave_homologada = tmp.empresa_sku\n\tAND emp.entidad_origen = 'PRODUCTO_EMPRESAS'\nINNER JOIN shared.catalogos pai ON pai.clave_homologada = tmp.pais_sku\n\tAND pai.entidad_origen = 'PAIS'\nINNER JOIN shared.catalogos edo ON edo.clave_homologada = tmp.estado_sku\n\tAND edo.entidad_origen = 'ESTADO'\nON CONFLICT ON CONSTRAINT pk_jerarquia_producto\nDO NOTHING",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TProductos"
+            },
+            {
+                "name": "is_comprador_corp",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_comprador_corp",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*COMPCORP_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_productos",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_comprador_corp"
+            },
+            {
+                "name": "WCompradorCorporativo",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WCompradorCorporativo",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6\ntrim body_1\ntrim body_4\ntrim body_7\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "91666dcb-31f5-42d0-aa48-93650acc630d"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_comprador_corp",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WCompradorCorporativo"
+            },
+            {
+                "name": "LCompradorCorporativo",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LCompradorCorporativo",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-comprador-corporativo",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WCompradorCorporativo",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LCompradorCorporativo"
+            },
+            {
+                "name": "TCompradorCorporativo",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TCompradorCorporativo",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, 'PRODUCTO_COMPRADOR_CORPORATIVO'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TCompradorCorporativo"
+            },
+            {
+                "name": "is_empresa",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_empresa",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_EMPRESA_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_direccion",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_empresa"
+            },
+            {
+                "name": "is_familia_negocio",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_familia_negocio",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_FAMNEG_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_empresa",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_familia_negocio"
+            },
+            {
+                "name": "is_pais",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_pais",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_PAIS_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "inputSchema": [],
+                "id": "is_pais"
+            },
+            {
+                "name": "is_rango_precio",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_rango_precio",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_RNGPRC_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_pais",
+                        "schema": ""
+                    }
+                ],
+                "id": "is_rango_precio"
+            },
+            {
+                "name": "is_categoria_sku",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_categoria_sku",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_SKUCAT_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_rango_precio",
+                        "schema": ""
+                    }
+                ],
+                "id": "is_categoria_sku"
+            },
+            {
+                "name": "is_status_sku",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_status_sku",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_SKUSTA_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_categoria_sku",
+                        "schema": ""
+                    }
+                ],
+                "id": "is_status_sku"
+            },
+            {
+                "name": "is_temporadas",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_temporadas",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*INB_TEMPORADA_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_status_sku",
+                        "schema": ""
+                    }
+                ],
+                "id": "is_temporadas"
+            },
+            {
+                "name": "WTemporadas",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WTemporadas",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6\ntrim body_1\ntrim body_4\ntrim body_7\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "91666dcb-31f5-42d0-aa48-93650acc630d"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_temporadas",
+                        "schema": ""
+                    }
+                ],
+                "id": "WTemporadas"
+            },
+            {
+                "name": "LTemporadas",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LTemporadas",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-temporadas",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WTemporadas",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LTemporadas"
+            },
+            {
+                "name": "TTemporadas",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TTemporadas",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, 'PRODUCTO_TEMPORADAS'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TTemporadas"
+            },
+            {
+                "name": "WTipoNegocio",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WTipoNegocio",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6\ntrim body_1\ntrim body_4\ntrim body_7\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "91666dcb-31f5-42d0-aa48-93650acc630d"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_temporadas",
+                        "schema": ""
+                    }
+                ],
+                "id": "WTipoNegocio"
+            },
+            {
+                "name": "LTipoNegocio",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LTipoNegocio",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-tipo-negocio",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WTipoNegocio",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LTipoNegocio"
+            },
+            {
+                "name": "TTipoNegocio",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TTipoNegocio",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, 'PRODUCTO_TIPOS_DE_NEGOCIO'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TTipoNegocio"
+            },
+            {
+                "name": "WStatusSKU",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WStatusSKU",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6\ntrim body_1\ntrim body_4\ntrim body_7\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "91666dcb-31f5-42d0-aa48-93650acc630d"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_status_sku",
+                        "schema": ""
+                    }
+                ],
+                "id": "WStatusSKU"
+            },
+            {
+                "name": "LStatusSKU",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LStatusSKU",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-status-sku",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WStatusSKU",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LStatusSKU"
+            },
+            {
+                "name": "TStatusSKU",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TStatusSKU",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, 'PRODUCTO_STATUS_SKU'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TStatusSKU"
+            },
+            {
+                "name": "WCategoriaSKU",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WCategoriaSKU",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6\ntrim body_1\ntrim body_4\ntrim body_7\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "91666dcb-31f5-42d0-aa48-93650acc630d"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_categoria_sku",
+                        "schema": ""
+                    }
+                ],
+                "id": "WCategoriaSKU"
+            },
+            {
+                "name": "LCategoriaSKU",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LCategoriaSKU",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-categoria-sku",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WCategoriaSKU",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LCategoriaSKU"
+            },
+            {
+                "name": "TCategoriaSKU",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TCategoriaSKU",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, 'PRODUCTO_CATEGORIAS'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TCategoriaSKU"
+            },
+            {
+                "name": "WRangoPrecio",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WRangoPrecio",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6\ntrim body_1\ntrim body_4\ntrim body_7\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "91666dcb-31f5-42d0-aa48-93650acc630d"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_rango_precio",
+                        "schema": ""
+                    }
+                ],
+                "id": "WRangoPrecio"
+            },
+            {
+                "name": "LRangoPrecio",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LRangoPrecio",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-rango-precio",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WRangoPrecio",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LRangoPrecio"
+            },
+            {
+                "name": "TRangoPrecio",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TRangoPrecio",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, 'PRODUCTO_RANGO_DE_PRECIOS_SKU'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TRangoPrecio"
+            },
+            {
+                "name": "WPais",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WPais",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6\ntrim body_1\ntrim body_4\ntrim body_7\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "91666dcb-31f5-42d0-aa48-93650acc630d"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_pais",
+                        "schema": ""
+                    }
+                ],
+                "id": "WPais"
+            },
+            {
+                "name": "LPais",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LPais",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-pais",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WPais",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LPais"
+            },
+            {
+                "name": "TPais",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TPais",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, 'PAISES'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TPais"
+            },
+            {
+                "name": "WFamiliaNegocio",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WFamiliaNegocio",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6\ntrim body_1\ntrim body_4\ntrim body_7\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "91666dcb-31f5-42d0-aa48-93650acc630d"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_familia_negocio",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WFamiliaNegocio"
+            },
+            {
+                "name": "LFamiliaNegocio",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LFamiliaNegocio",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-familia-negocio",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WFamiliaNegocio",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LFamiliaNegocio"
+            },
+            {
+                "name": "TFamiliaNegocio",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TFamiliaNegocio",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, 'PRODUCTO_FAMILIA_DE_NEGOCIO'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TFamiliaNegocio"
+            },
+            {
+                "name": "WEmpresa",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WEmpresa",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6\ntrim body_1\ntrim body_4\ntrim body_7\nrename body_1 clave_homologada\nrename body_4 descripcion\nrename body_7 fecha_actualizacion\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "91666dcb-31f5-42d0-aa48-93650acc630d"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "is_empresa",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WEmpresa"
+            },
+            {
+                "name": "LEmpresa",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LEmpresa",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-empresa",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "catalogos_producto_tmp",
+                        "columns": "clave_homologada, descripcion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WEmpresa",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"clave_homologada\",\"type\":[\"string\",\"null\"]},{\"name\":\"descripcion\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LEmpresa"
+            },
+            {
+                "name": "TEmpresa",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TEmpresa",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tmp AS (\n\tSELECT *\n\t\tFROM staging.catalogos_producto_tmp\n\tWHERE estado = 0\n), ins AS (\n\tINSERT INTO shared.catalogos(\n    \tclave_homologada, descripcion_catalogo, flexfield0, entidad_origen)\n\tSELECT\n    \ttmp.clave_homologada, tmp.descripcion, tmp.fecha_actualizacion, 'PRODUCTO_EMPRESAS'\n\tFROM tmp\n\tON CONFLICT ON CONSTRAINT catalogos_nodup_rows\n\tDO NOTHING\n)\nUPDATE staging.catalogos_producto_tmp\nSET estado = 1\nWHERE id_catalogos_producto_tmp IN (\n\tSELECT id_catalogos_producto_tmp\n\tFROM tmp)",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TEmpresa"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Pipeline batch para Jerarquía de Producto",
+        "maxConcurrentRuns": 1
+    }
+}

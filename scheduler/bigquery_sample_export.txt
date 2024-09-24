@@ -1,0 +1,15 @@
+resource "google_pubsub_topic" "bq_exports_topic" {
+  name = "bq-exports-topic"
+}
+
+resource "google_cloud_scheduler_job" "tabla-boletas-export-job" {
+  name        = "tabla_boletas_export"
+  description = "tabla boletas export"
+  schedule    = "0 0 * * 0"
+
+  pubsub_target {
+    # topic.id is the topic's full resource name.
+    topic_name = google_pubsub_topic.bq_exports_topic.id
+    data       = base64encode('{"dataset_id":"sample_dataset","table_id":"table","project":"cdp_project","bucket_name":"backups_bucket"}')
+  }
+}

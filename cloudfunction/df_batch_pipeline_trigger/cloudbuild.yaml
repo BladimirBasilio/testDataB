@@ -1,0 +1,52 @@
+steps:
+  - id: "unit test"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    entrypoint: "/bin/bash"
+    args: ["${_FOLDER}/scripts/unit_test.sh"]
+  - id: "zip source"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    entrypoint: /bin/bash
+    args:
+      - -c
+      - |
+        if [ ! $(command -v zip) ]; then apt update && apt install zip -y; fi
+        cd  ${_FOLDER}/source/
+        zip cf.zip -r *
+        zip -T cf.zip
+
+  - id: "gsutil cp zip artifact"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    entrypoint: /bin/bash
+    args:
+      - -c
+      - |
+        gsutil cp ${_FOLDER}/source/cf.zip gs://${_ARTIFACT_BUCKET_NAME}/${_CDP_PROJECT_ID}/cloud-functions/${_FOLDER}/${BUILD_ID}/${BRANCH_NAME}.zip
+
+  - id: "deploy cloud function"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    entrypoint: "/bin/bash"
+    args:
+      [
+        "${_FOLDER}/scripts/deploy_function.sh",
+        "gs://${_ARTIFACT_BUCKET_NAME}/${_CDP_PROJECT_ID}/cloud-functions/${_FOLDER}/${BUILD_ID}/${BRANCH_NAME}.zip",
+      ]
+    env:
+      - "PROJECT_ID=$_CDP_PROJECT_ID"
+      - "DF_PROJECT_ID=$_DF_PROJECT_ID"
+      - "DF_PREFIX=$_DF_PREFIX"
+      - "FUNCTION_NAME=$_FUNCTION_NAME"
+      - "LOCATION=$_LOCATION"
+      - "DF_INSTANCE_NAME=$_DF_INSTANCE_NAME"
+      - "DF_NAMESPACE=$_DF_NAMESPACE"
+      - "DF_LOCATION=$_DF_LOCATION"
+      - "BUCKET_NAME_INPUT=$_BUCKET_NAME_INPUT"
+      - "DB_URL_SECRET_NAME=$_DB_URL_SECRET_NAME"
+      - "DB_USER_SECRET_NAME=$_DB_USER_SECRET_NAME"
+      - "DB_PASSWORD_SECRET_NAME=$_DB_PASSWORD_SECRET_NAME"
+      - "SERVICE_ACCOUNT=$_SERVICE_ACCOUNT"
+      - "ENTRYPOINTNAME=$_ENTRYPOINTNAME"
+
+artifacts:
+  objects:
+    location: "gs://${_ARTIFACT_BUCKET_NAME}/${_CDP_PROJECT_ID}/cloud-functions/${_FOLDER}/${BUILD_ID}"
+    paths: ["${_FOLDER}/cloudbuild.yaml"]

@@ -1,0 +1,67 @@
+
+CREATE SEQUENCE staging.pedidos_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 0
+    MAXVALUE 2147483647
+    CACHE 1;
+
+CREATE TABLE STAGING.PEDIDOS_SOMS(
+    pedidos_id integer NOT NULL DEFAULT nextval('staging.pedidos_seq'::regclass),
+	numero_del_documento varchar(10) NOT NULL,
+    id_sku integer NOT NULL,
+    piezas numeric(16,2) DEFAULT 0.00,
+    numero_de_intentos_de_entrega integer,
+    estado_por_linea varchar(255),
+    fecha_de_compra date,
+    fecha_actualizacion_estado date,
+    hora_actualizacion_estado time,
+    usuario_actualizador_estado varchar(255),
+    id_tipo_entrega varchar(255),
+    numero_de_guia varchar(255),
+    proveedor_de_mensajeria varchar(255),
+    id_cliente_remitente integer,
+    nombre_remitente varchar(255),
+    telefono_celular_remitente varchar(255),
+    telefono_fijo_remitente varchar(255),
+    telefono_oficina_remitente varchar(255),
+    correo_electronico_remitente varchar(255),
+    id_cliente_destinatario integer,
+    nombre_destinatario varchar(255),
+    apellido_paterno_destinatario varchar(255),
+    apellido_materno_destinatario varchar(255),
+    calle_destinatario varchar(255),
+    numero_exterior_destinatario varchar(255),
+    numero_interior_destinatario varchar(255),
+    codigo_postal_destinatario varchar(255),
+    colonia_destinatario varchar(255),
+    municipio_destinatario varchar(255),
+    estado_destinatario varchar(255),
+    entre_calle_destinatario varchar(255),
+    y_calle_destinatario varchar(255),
+    telefono_celular_destinatario varchar(255),
+    telefono_fijo_destinatario varchar(255),
+    telefono_oficina_destinatario varchar(255),
+    correo_electronico_destinatario varchar(255),
+    fecha_rango_promesa_entrega date,
+    fecha_recalculada date,
+    fecha_real_entrega date,
+    indicador_mkp varchar(255),
+    id_tipo_documento varchar(255),
+    id_tipo_act varchar(255),
+    hora_emision time,
+    fecha_emision date,
+    locacion_destino integer,
+    locacion_que_surte integer,
+    fecha_surtido date,
+    cantidad_recogida numeric(16,2) DEFAULT 0.00,
+    causa_no_entrega varchar(255),
+    frecuencia_visita varchar(255),
+    periodicidad varchar(255),
+    cantidad_cancelada numeric(16,2) DEFAULT 0.00,
+    cantidad_entregada numeric(16,2) DEFAULT 0.00,
+    observaciones varchar(255),
+    orden_original varchar(255),
+	CONSTRAINT PK_PEDIDOS_SOMS PRIMARY KEY (pedidos_id)
+	WITH (FILLFACTOR = 100)
+);

@@ -1,0 +1,3 @@
+google-api-python-client
+google-cloud-bigquery
+Oauth2client

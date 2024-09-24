@@ -1,0 +1,636 @@
+{
+    "name": "batch_boletas_en_buzon_v25",
+    "description": "Data Pipeline Application",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "GCS_input_file",
+                "to": "is_boleta_sku"
+            },
+            {
+                "from": "is_boleta_sku",
+                "to": "w_boletas_sku",
+                "condition": true
+            },
+            {
+                "from": "is_boleta_sku",
+                "to": "is_forma_pago",
+                "condition": false
+            },
+            {
+                "from": "w_boletas_sku",
+                "to": "insert_boletas_sku"
+            },
+            {
+                "from": "insert_boletas_sku",
+                "to": "insert_in_actual_sku"
+            },
+            {
+                "from": "is_forma_pago",
+                "to": "w_forma_pago",
+                "condition": true
+            },
+            {
+                "from": "is_forma_pago",
+                "to": "is_motivo_dev",
+                "condition": false
+            },
+            {
+                "from": "w_forma_pago",
+                "to": "insert_forma_pago"
+            },
+            {
+                "from": "insert_forma_pago",
+                "to": "insert_in_actual_forma_pago"
+            },
+            {
+                "from": "is_motivo_dev",
+                "to": "w_motivo_dev",
+                "condition": true
+            },
+            {
+                "from": "is_motivo_dev",
+                "to": "w_tipo_tsx",
+                "condition": false
+            },
+            {
+                "from": "w_motivo_dev",
+                "to": "insert_motivo_dev"
+            },
+            {
+                "from": "insert_motivo_dev",
+                "to": "insert_in_actual_motivo_dev"
+            },
+            {
+                "from": "w_tipo_tsx",
+                "to": "insert_tipo_tsx"
+            },
+            {
+                "from": "insert_tipo_tsx",
+                "to": "insert_in_actual_tipo_tsx"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "GCS_input_file",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "GCS_input_file",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "data-fusion.CDP_DWH_INB_BOLETAS_SKU.dat",
+                        "project": "auto-detect",
+                        "path": "${input_uri}",
+                        "format": "text",
+                        "skipHeader": "false",
+                        "serviceAccountType": "filePath",
+                        "serviceFilePath": "auto-detect",
+                        "filenameOnly": "false",
+                        "recursive": "false",
+                        "encrypted": "false",
+                        "fileEncoding": "UTF-8",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "GCS_input_file"
+            },
+            {
+                "name": "is_boleta_sku",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_boleta_sku",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*SKU_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "GCS_input_file",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_boleta_sku"
+            },
+            {
+                "name": "w_boletas_sku",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "w_boletas_sku",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15,body_18,body_17,body_20,body_21,body_23,body_24,body_26,body_27,body_29,body_30,body_32,body_33,body_35,body_36,body_38,body_39,body_41,body_42,body_44,body_45,body_47,body_48,body_50,body_51,body_53,body_54,body_56,body_57,body_59,body_60,body_62,body_63,body_65,body_66,body_68,body_69,body_71,body_72,body_74,body_75,body_77,body_78,body_80,body_81,body_83,body_84,body_86,body_87,body_89,body_90,body_92,body_93,body_95,body_96,body_98,body_99,body_101,body_102,body_104,body_105,body_107,body_108,body_110,body_111,body_113,body_114,body_116,body_117,body_120,body_119,body_122,body_123,body_125,body_126,body_129,body_128,body_131,body_132,body_134,body_135,body_137,body_138,body_140,body_141,body_143,body_144,body_147,body_146,body_149,body_150,body_152,body_153,body_155,body_156,body_158,body_159,body_161,body_162,body_164,body_165,body_167,body_168,body_170,body_171\nrename body_1 TICKET\nrename body_4 ID_TIENDA\nrename body_7 FECHA_TRANSACCION\nrename body_10 ID_TERMINAL_POS\nrename body_13 NUMERO_BOLETA\nrename body_16 NUMERO_TRANSACCION\nrename body_19 ID_EMPRESA\nrename body_22 ID_VENDEDOR\nrename body_25 ID_CLIENTE\nrename body_28 ID_TIPO_TRANSACCION\nrename body_31 ESTADO_TRANSACCION\nrename body_34 NUMERO_CUENTA\nrename body_37 NUMERO_CUENTA_SUBROGADA\nrename body_40 TOTAL_BOLETA\nrename body_43 TOTAL_REBAJAS_SKU_BOLETA\nrename body_46 TOTAL_DESCUENTO_BOLETA\nrename body_49 ID_TIPO_DESCUENTO\nrename body_52 HORA_TRANSACCION\nrename body_55 NUMERO_EVENTO\nrename body_58 NUMERO_ENTREGA_SOMS\nrename body_61 NUMERO_TELEFONO\nrename body_64 NUMERO_ORDEN_OPTICA\nrename body_67 PROMOCION_CRM\nrename body_70 ID_CLIENTE_PROMO_CRM\nrename body_73 ID_CLIENTE_KYBELA\nrename body_76 PROMO_ITUNES\nrename body_79 CERTIFICADO_ITUNES\nrename body_82 CANTIDAD_ARTICULOS\nrename body_85 TOTAL_PAGADO_REAL\nrename body_88 CLAVE_HOMOLOGADA\nrename body_91 MONTO_REBAJA\nrename body_94 MONTO_DESCUENTO\nrename body_97 TOTAL_POR_SKU\nrename body_100 MONTO_IMPUESTO\nrename body_103 MONTO_IMPUESTO1\nrename body_106 MONTO_IMPUESTO2\nrename body_109 MONTO_IMPUESTO3\nrename body_112 TOTAL_ANTES_DE_IMPUESTO\nrename body_115 BANDERA_ID_TRX_DE_MERCANCIA\nrename body_118 BANDERA_ID_TRX_CON_MONEDERO\nrename body_121 BANDERA_ID_TRX_CON_MESA_DE_REGALO\nrename body_124 BANDERA_ID_TRX_DE_BUZON\nrename body_127 ID_TIENDA_ORIGINAL\nrename body_130 FECHA_ORIGINAL_COMPRA\nrename body_133 ID_TERMINAL_POS_2\nrename body_136 ID_VENDEDOR_2\nrename ID_VENDEDOR_2 NUMERO_BOLETA_ORIGINAL\nrename body_139 ID_VENDEDOR_2\nrename body_142 PRECIO_ACTUAL_SKU\nrename body_145 BANDERA_ID_TRX_DE_INVITADO\nrename body_148 ID_MOTIVO_DEVOLUCION\nrename body_151 ID_TIENDA_RECEPCION\nrename body_154 ID_CANAL\nrename body_157 ID_DISPOSITIVO_VENTA\nrename body_160 ID_CLIENTE_ORIGINAL\nrename body_163 BANDERA_EJECUCION_TOKEN\nrename body_166 BANDERA_ORIGINAL_BUZON\nrename body_169 FECHA_ORIGINAL_BUZON\nrename body_172 HASH_TARJETA\nparse-as-simple-date :FECHA_TRANSACCION yyyy-MM-dd\nset-type :TOTAL_BOLETA float\nset-type :TOTAL_REBAJAS_SKU_BOLETA float\nset-type :TOTAL_DESCUENTO_BOLETA float\ntrim CANTIDAD_ARTICULOS\nset-type :CANTIDAD_ARTICULOS float\nset-type :TOTAL_PAGADO_REAL float\nset-type :MONTO_REBAJA float\nset-type :MONTO_DESCUENTO float\nset-type :TOTAL_POR_SKU float\nset-type :MONTO_IMPUESTO float\nset-type :MONTO_IMPUESTO1 float\nset-type :MONTO_IMPUESTO2 float\nset-type :CANTIDAD_ARTICULOS integer\nset-type :MONTO_IMPUESTO3 float\nset-type :TOTAL_ANTES_DE_IMPUESTO float\nparse-as-simple-date :FECHA_ORIGINAL_COMPRA yyyy-MM-dd\nset-type :PRECIO_ACTUAL_SKU float",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"TICKET\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_TRANSACCION\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"ID_TERMINAL_POS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_EMPRESA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_CUENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_CUENTA_SUBROGADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"TOTAL_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_REBAJAS_SKU_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_DESCUENTO_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"ID_TIPO_DESCUENTO\",\"type\":[\"string\",\"null\"]},{\"name\":\"HORA_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_EVENTO\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_ENTREGA_SOMS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_TELEFONO\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_ORDEN_OPTICA\",\"type\":[\"string\",\"null\"]},{\"name\":\"PROMOCION_CRM\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_PROMO_CRM\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_KYBELA\",\"type\":[\"string\",\"null\"]},{\"name\":\"PROMO_ITUNES\",\"type\":[\"string\",\"null\"]},{\"name\":\"CERTIFICADO_ITUNES\",\"type\":[\"string\",\"null\"]},{\"name\":\"CANTIDAD_ARTICULOS\",\"type\":[\"int\",\"null\"]},{\"name\":\"TOTAL_PAGADO_REAL\",\"type\":[\"float\",\"null\"]},{\"name\":\"CLAVE_HOMOLOGADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"MONTO_REBAJA\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_DESCUENTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_POR_SKU\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO1\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO2\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO3\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_ANTES_DE_IMPUESTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_MERCANCIA\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_CON_MONEDERO\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_CON_MESA_DE_REGALO\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_COMPRA\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"ID_TERMINAL_POS_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"PRECIO_ACTUAL_SKU\",\"type\":[\"float\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_INVITADO\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_MOTIVO_DEVOLUCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_RECEPCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CANAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_DISPOSITIVO_VENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_EJECUCION_TOKEN\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ORIGINAL_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA\",\"type\":[\"string\",\"null\"]}]}",
+                        "workspaceId": "4a3bf5f7-64d9-44eb-b029-1ab2a7bb9474"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"TICKET\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_TRANSACCION\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"ID_TERMINAL_POS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_EMPRESA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_CUENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_CUENTA_SUBROGADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"TOTAL_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_REBAJAS_SKU_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_DESCUENTO_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"ID_TIPO_DESCUENTO\",\"type\":[\"string\",\"null\"]},{\"name\":\"HORA_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_EVENTO\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_ENTREGA_SOMS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_TELEFONO\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_ORDEN_OPTICA\",\"type\":[\"string\",\"null\"]},{\"name\":\"PROMOCION_CRM\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_PROMO_CRM\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_KYBELA\",\"type\":[\"string\",\"null\"]},{\"name\":\"PROMO_ITUNES\",\"type\":[\"string\",\"null\"]},{\"name\":\"CERTIFICADO_ITUNES\",\"type\":[\"string\",\"null\"]},{\"name\":\"CANTIDAD_ARTICULOS\",\"type\":[\"int\",\"null\"]},{\"name\":\"TOTAL_PAGADO_REAL\",\"type\":[\"float\",\"null\"]},{\"name\":\"CLAVE_HOMOLOGADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"MONTO_REBAJA\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_DESCUENTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_POR_SKU\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO1\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO2\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO3\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_ANTES_DE_IMPUESTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_MERCANCIA\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_CON_MONEDERO\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_CON_MESA_DE_REGALO\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_COMPRA\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"ID_TERMINAL_POS_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"PRECIO_ACTUAL_SKU\",\"type\":[\"float\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_INVITADO\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_MOTIVO_DEVOLUCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_RECEPCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CANAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_DISPOSITIVO_VENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_EJECUCION_TOKEN\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ORIGINAL_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_boleta_sku",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "w_boletas_sku"
+            },
+            {
+                "name": "is_forma_pago",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_forma_pago",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*FORMA_PAGO_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_boleta_sku",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_forma_pago"
+            },
+            {
+                "name": "insert_boletas_sku",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "insert_boletas_sku",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "ingest_boletas_sku",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "boletas_en_buzon_sku",
+                        "columns": "TICKET,ID_TIENDA,FECHA_TRANSACCION,ID_TERMINAL_POS,NUMERO_BOLETA,NUMERO_TRANSACCION,ID_EMPRESA,ID_VENDEDOR,ID_CLIENTE,ID_TIPO_TRANSACCION,ESTADO_TRANSACCION,NUMERO_CUENTA,NUMERO_CUENTA_SUBROGADA,TOTAL_BOLETA,TOTAL_REBAJAS_SKU_BOLETA,TOTAL_DESCUENTO_BOLETA,ID_TIPO_DESCUENTO,HORA_TRANSACCION,NUMERO_EVENTO,NUMERO_ENTREGA_SOMS,NUMERO_TELEFONO,NUMERO_ORDEN_OPTICA,PROMOCION_CRM,ID_CLIENTE_PROMO_CRM,ID_CLIENTE_KYBELA,PROMO_ITUNES,CERTIFICADO_ITUNES,CANTIDAD_ARTICULOS,TOTAL_PAGADO_REAL,CLAVE_HOMOLOGADA,MONTO_REBAJA,MONTO_DESCUENTO,TOTAL_POR_SKU,MONTO_IMPUESTO,MONTO_IMPUESTO1,MONTO_IMPUESTO2,MONTO_IMPUESTO3,TOTAL_ANTES_DE_IMPUESTO,BANDERA_ID_TRX_DE_MERCANCIA,BANDERA_ID_TRX_CON_MONEDERO,BANDERA_ID_TRX_CON_MESA_DE_REGALO,BANDERA_ID_TRX_DE_BUZON,ID_TIENDA_ORIGINAL,FECHA_ORIGINAL_COMPRA,ID_TERMINAL_POS_2,NUMERO_BOLETA_ORIGINAL,ID_VENDEDOR_2,PRECIO_ACTUAL_SKU,BANDERA_ID_TRX_DE_INVITADO,ID_MOTIVO_DEVOLUCION,ID_TIENDA_RECEPCION,ID_CANAL,ID_DISPOSITIVO_VENTA,ID_CLIENTE_ORIGINAL,BANDERA_EJECUCION_TOKEN,BANDERA_ORIGINAL_BUZON,FECHA_ORIGINAL_BUZON,HASH_TARJETA",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"TICKET\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_TRANSACCION\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"ID_TERMINAL_POS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_EMPRESA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_CUENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_CUENTA_SUBROGADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"TOTAL_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_REBAJAS_SKU_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_DESCUENTO_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"ID_TIPO_DESCUENTO\",\"type\":[\"string\",\"null\"]},{\"name\":\"HORA_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_EVENTO\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_ENTREGA_SOMS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_TELEFONO\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_ORDEN_OPTICA\",\"type\":[\"string\",\"null\"]},{\"name\":\"PROMOCION_CRM\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_PROMO_CRM\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_KYBELA\",\"type\":[\"string\",\"null\"]},{\"name\":\"PROMO_ITUNES\",\"type\":[\"string\",\"null\"]},{\"name\":\"CERTIFICADO_ITUNES\",\"type\":[\"string\",\"null\"]},{\"name\":\"CANTIDAD_ARTICULOS\",\"type\":[\"int\",\"null\"]},{\"name\":\"TOTAL_PAGADO_REAL\",\"type\":[\"float\",\"null\"]},{\"name\":\"CLAVE_HOMOLOGADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"MONTO_REBAJA\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_DESCUENTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_POR_SKU\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO1\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO2\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO3\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_ANTES_DE_IMPUESTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_MERCANCIA\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_CON_MONEDERO\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_CON_MESA_DE_REGALO\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_COMPRA\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"ID_TERMINAL_POS_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"PRECIO_ACTUAL_SKU\",\"type\":[\"float\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_INVITADO\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_MOTIVO_DEVOLUCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_RECEPCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CANAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_DISPOSITIVO_VENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_EJECUCION_TOKEN\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ORIGINAL_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "w_boletas_sku",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"TICKET\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_TRANSACCION\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"ID_TERMINAL_POS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_EMPRESA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_CUENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_CUENTA_SUBROGADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"TOTAL_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_REBAJAS_SKU_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_DESCUENTO_BOLETA\",\"type\":[\"float\",\"null\"]},{\"name\":\"ID_TIPO_DESCUENTO\",\"type\":[\"string\",\"null\"]},{\"name\":\"HORA_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_EVENTO\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_ENTREGA_SOMS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_TELEFONO\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_ORDEN_OPTICA\",\"type\":[\"string\",\"null\"]},{\"name\":\"PROMOCION_CRM\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_PROMO_CRM\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_KYBELA\",\"type\":[\"string\",\"null\"]},{\"name\":\"PROMO_ITUNES\",\"type\":[\"string\",\"null\"]},{\"name\":\"CERTIFICADO_ITUNES\",\"type\":[\"string\",\"null\"]},{\"name\":\"CANTIDAD_ARTICULOS\",\"type\":[\"int\",\"null\"]},{\"name\":\"TOTAL_PAGADO_REAL\",\"type\":[\"float\",\"null\"]},{\"name\":\"CLAVE_HOMOLOGADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"MONTO_REBAJA\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_DESCUENTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_POR_SKU\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO1\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO2\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO3\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_ANTES_DE_IMPUESTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_MERCANCIA\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_CON_MONEDERO\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_CON_MESA_DE_REGALO\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_COMPRA\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"ID_TERMINAL_POS_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR_2\",\"type\":[\"string\",\"null\"]},{\"name\":\"PRECIO_ACTUAL_SKU\",\"type\":[\"float\",\"null\"]},{\"name\":\"BANDERA_ID_TRX_DE_INVITADO\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_MOTIVO_DEVOLUCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_RECEPCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CANAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_DISPOSITIVO_VENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CLIENTE_ORIGINAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_EJECUCION_TOKEN\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_ORIGINAL_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "id": "insert_boletas_sku"
+            },
+            {
+                "name": "insert_in_actual_sku",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "insert_in_actual_sku",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH step1 AS (\n\tINSERT INTO boletas.boletas_en_buzon(\n\tid_terminal_pos, numero_boleta, fecha_transaccion, hora_transaccion, id_tienda_original, id_tienda, monto_total_sku, total_rebajas_sku_boleta, \n\testado_transaccion, total_boleta, numero_transaccion, numero_de_unidades, numero_celular, numero_boleta_original, monto_boleta, precio_real, monto_emitido, \n\tprecio_unitario, codigo_facturacion, numero_evento, total_descuento_boleta, total_antes_de_impuesto, clave_devolucion, ticket, id_empresa, id_vendedor, \n\tid_cliente, id_tipo_transaccion, fecha_inicio_transaccion, id_tipo_descuento, descripcion_estado_transaccion, bandera_id_trx_de_invitado, \n\tid_cliente_promo_crm, id_cliente_kybela, numero_entrega_soms, fecha_original_buzon, promo_itunes, hash_tarjeta, fecha_fin_transaccion, id_canal, \n\tid_dispositivo_venta, bandera_original_buzon, id_tienda_recepcion, bandera_ejecucion_token, id_cliente_original, bandera_id_trx_de_mercancia, \n\tbandera_id_trx_con_monedero, fecha_original_compra, id_operacion, certificado_itunes, numero_cuenta_subrogada, promocion_crm, bandera_id_trx_de_buzon, \n\tbandera_id_trx_con_mesa_de_regalo, id_atg, id_mdm, numero_cuenta, id_terminal_pos_original)\nSELECT\n\tterm.ID_CATALOGO as ID_TERMINAL_POS \t\t\t\t\t\t\t\t,\n\t\tNUMERO_BOLETA \t\t\t\t\t\t\t\t,\n\t\tFECHA_TRANSACCION \t\t\t\t\t\t\t,\n\t\tCASE WHEN HORA_TRANSACCION='0' THEN  TO_TIMESTAMP('1970/01/01/00:00:00', 'YYYY/MM/DD/HH24:MI:ss')::time\n\t\t\t WHEN HORA_TRANSACCION<>'0' THEN TO_TIMESTAMP(HORA_TRANSACCION, 'YYYY/MM/DD/HH24:MI:ss')::time\n\t\t\t ELSE   TO_TIMESTAMP('1970/01/01/00:00:00', 'YYYY/MM/DD/HH24:MI:ss')::time\n\t\t\t END as HORA_TRANSACCION,\n\t\ttiend1.ID_TIENDA_O_LOCACION as ID_TIENDA_ORIGINAL \t\t\t\t\t\t\t,\n\t\ttiend2.ID_TIENDA_O_LOCACION as ID_TIENDA \t\t\t\t\t\t\t\t\t,\n\t\tTOTAL_POR_SKU \t\t\t\t\t\t\t\t,\n\t\tTOTAL_REBAJAS_SKU_BOLETA \t\t\t\t\t,\n\tESTADO_TRANSACCION \t\t\t\t\t\t\t\t,\n\t\tTOTAL_BOLETA\t\t\t\t                ,\n\t\tnull as NUMERO_TRANSACCION                  ,\n\t\tCANTIDAD_ARTICULOS as NUMERO_DE_UNIDADES    ,\n\t\tNUMERO_TELEFONO AS NUMERO_CELULAR           ,\n\t\tNUMERO_BOLETA_ORIGINAL                      ,\n\t\tTOTAL_BOLETA as MONTO_BOLETA                ,\n\t\tTOTAL_PAGADO_REAL                           ,\n\t\tTOTAL_ANTES_DE_IMPUESTO as MONTO_EMITIDO    ,\n\tnull as PRECIO_UNITARIO                         ,\n\t\tnull as CODIGO_FACTURACION                  ,\n\t\tNUMERO_EVENTO                               ,\n\t\tTOTAL_DESCUENTO_BOLETA                      ,\n\t\tTOTAL_ANTES_DE_IMPUESTO                     ,\n\t\tmotiv.ID_CATALOGO as CLAVE_DEVOLUCION    ,\n\t\tTICKET                                      ,\n\t\temp.ID_CATALOGO as ID_EMPRESA                                  ,\n\t\tvend.ID_CATALOGO as ID_VENDEDOR                                 ,\n\tcli1.ID_CLIENTE                                      ,\n\t\ttipo.ID_CATALOGO as ID_TIPO_TRANSACCION                         ,\n\t\tnull as FECHA_INICIO_TRANSACCION            ,\n\t\tdctos.ID_CATALOGO as ID_TIPO_DESCUENTO                           ,\n\t\tESTADO_TRANSACCION                          ,\n\t\tBANDERA_ID_TRX_DE_INVITADO                  ,\n\tCAST(nullif(ID_CLIENTE_PROMO_CRM, '') AS integer) as ID_CLIENTE_PROMO_CRM\t,\n\t\tCAST(nullif(ID_CLIENTE_KYBELA, '') AS integer) \t\t\t\t\t\t\t,\n\t\tped.NUMERO_DEL_DOCUMENTO as NUMERO_ENTREGA_SOMS                         ,\n\t\tTO_TIMESTAMP(FECHA_ORIGINAL_BUZON, 'YYYY-MM-DD')::date as FECHA_ORIGINAL_BUZON  ,\n\t\tPROMO_ITUNES                                ,\n\t\tHASH_TARJETA                                ,\n\t\tnull as FECHA_FIN_TRANSACCION               ,\n\t\tcanal.ID_CATALOGO as ID_CANAL                                    ,\n\tdisp.ID_CATALOGO as ID_DISPOSITIVO_VENTA                            ,\n\t\tBANDERA_ORIGINAL_BUZON                      ,\n\t\ttiend3.ID_TIENDA_O_LOCACION as ID_TIENDA_RECEPCION                         ,\n\t\tBANDERA_EJECUCION_TOKEN                     ,\n\t\tcli2.ID_CLIENTE as ID_CLIENTE_ORIGINAL                         ,\n\t\tBANDERA_ID_TRX_DE_MERCANCIA                 ,\n\tBANDERA_ID_TRX_CON_MONEDERO                     ,\n\t\tFECHA_ORIGINAL_COMPRA                       ,\n\t\tnull as ID_OPERACION                        ,\n\t\tCERTIFICADO_ITUNES                          ,\n\t\tNUMERO_CUENTA_SUBROGADA                     ,\n\t\tPROMOCION_CRM                               ,\n\t\tBANDERA_ID_TRX_DE_BUZON                     ,\n\tBANDERA_ID_TRX_CON_MESA_DE_REGALO               ,\n\t\tnull as ID_ATG                              ,\n\t\tnull as ID_MDM                              ,\n\t\tNUMERO_CUENTA                               ,\n\t\tTERM1.ID_CATALOGO as ID_TERMINAL_POS_2 \nFROM staging.boletas_en_buzon_sku bolsku\n\tLEFT JOIN shared.CATALOGOS term ON bolsku.ID_TERMINAL_POS=term.CLAVE_HOMOLOGADA\n\tLEFT JOIN shared.TIENDAS_Y_LOCACIONES tiend1 ON bolsku.ID_TIENDA_ORIGINAL =tiend1.CLAVE_HOMOLOGADA \t \t\t\t\t\n\tLEFT JOIN shared.TIENDAS_Y_LOCACIONES tiend2 ON bolsku.ID_TIENDA = tiend2.CLAVE_HOMOLOGADA\t\t\t\t\t\t\t\t\t\n\tLEFT JOIN shared.TIENDAS_Y_LOCACIONES tiend3 ON bolsku.ID_TIENDA_RECEPCION = tiend3.CLAVE_HOMOLOGADA\t\t\t\t\t\t\t\t\t\n\tLEFT JOIN shared.CATALOGOS motiv ON bolsku.ID_MOTIVO_DEVOLUCION=motiv.CLAVE_HOMOLOGADA\n\tLEFT JOIN shared.CATALOGOS emp ON bolsku.ID_EMPRESA=emp.CLAVE_HOMOLOGADA\n\tLEFT JOIN shared.CATALOGOS vend ON bolsku.ID_VENDEDOR=vend.CLAVE_HOMOLOGADA\n\tLEFT JOIN shared.CATALOGOS tipo ON bolsku.ID_TIPO_TRANSACCION=tipo.CLAVE_HOMOLOGADA\n\tLEFT JOIN shared.CATALOGOS dctos ON bolsku.ID_TIPO_DESCUENTO=dctos.CLAVE_HOMOLOGADA\n\tLEFT JOIN pedidos.PEDIDOS  ped ON bolsku.NUMERO_ENTREGA_SOMS=ped.NUMERO_DEL_DOCUMENTO --pedido \n\tLEFT JOIN shared.CATALOGOS canal ON bolsku.ID_CANAL=canal.CLAVE_HOMOLOGADA\n\tLEFT JOIN shared.CATALOGOS disp ON bolsku.ID_DISPOSITIVO_VENTA=disp.CLAVE_HOMOLOGADA\n\tLEFT JOIN shared.CATALOGOS term1 ON bolsku.ID_TERMINAL_POS_2=term.CLAVE_HOMOLOGADA\n\tINNER JOIN clientes.CLIENTES cli1 ON bolsku.ID_CLIENTE=cli1.CLAVE_HOMOLOGADA\n\tINNER JOIN clientes.CLIENTES cli2 ON bolsku.ID_CLIENTE_ORIGINAL=cli2.CLAVE_HOMOLOGADA\nWHERE term.ENTIDAD_ORIGEN='TERMINAL_POS'\n\t AND  motiv.ENTIDAD_ORIGEN='MOTIVO_DEVOLUCION'\n\t AND  emp.ENTIDAD_ORIGEN  ='EMPRESAS_DE_PRODUCTOS' \n\t AND  vend.ENTIDAD_ORIGEN ='VENDEDORES'\n\t AND  tipo.ENTIDAD_ORIGEN ='TIPOS_DE_TRANSACCION'\n\t AND  dctos.ENTIDAD_ORIGEN='DESCUENTOS'\n\t AND  canal.ENTIDAD_ORIGEN='CANALES_DE_VENTA'\n\t AND  disp.ENTIDAD_ORIGEN ='DISPOSITIVOS_DE_VENTA'\n\t AND  term1.ENTIDAD_ORIGEN='TERMINAL_POS'\n)\n\nINSERT INTO boletas.boletas_en_buzon_detalle_sku(\n\tid_linea_de_detalle, id_terminal_pos_boletas_en_buzon, numero_boleta_boletas_en_buzon, fecha_transaccion_boletas_en_buzon, hora_transaccion_boletas_en_buzon,\n\tid_tienda_original_boletas_en_buzon, id_tienda_boletas_en_buzon, numero_orden_optica, cantidad_articulos, total_pagado_real, clave_homologada, monto_rebaja,\n\tprecio_actual_sku, monto_descuento, monto_impuesto, monto_impuesto1, monto_impuesto2, monto_impuesto3, total_por_sku, id_motivo_devolucion, id_sku)\nSELECT \n\trow_number() OVER (PARTITION BY NUMERO_BOLETA) as ID_LINEA_DE_DETALLE\t\t\t\t,\n\t\tterm.ID_CATALOGO as ID_TERMINAL_POS_BOLETAS_EN_BUZON \t\t\t\t\t\t\t,\n\t\tbolsku1.NUMERO_BOLETA as NUMERO_BOLETA_BOLETAS_EN_BUZON\t\t\t\t\t\t\t,\n\t\tbolsku1.FECHA_TRANSACCION as FECHA_TRANSACCION_BOLETAS_EN_BUZON\t\t\t\t\t,\n\t\tCASE WHEN bolsku1.HORA_TRANSACCION='0' THEN  TO_TIMESTAMP('1970/01/01/00:00:00', 'YYYY/MM/DD/HH24:MI:ss')::time\n\t\t\t WHEN bolsku1.HORA_TRANSACCION<>'0' THEN TO_TIMESTAMP(bolsku1.HORA_TRANSACCION, 'YYYY/MM/DD/HH24:MI:ss')::time\n\t\t\t ELSE   TO_TIMESTAMP('1970/01/01/00:00:00', 'YYYY/MM/DD/HH24:MI:ss')::time\n\t\t\t END as HORA_TRANSACCION_BOLETAS_EN_BUZON,\n\t\ttiend1.ID_TIENDA_O_LOCACION as ID_TIENDA_ORIGINAL_BOLETAS_EN_BUZON \t\t\t\t,\n\t\ttiend2.ID_TIENDA_O_LOCACION as ID_TIENDA_BOLETAS_EN_BUZON                       ,\n\t\tbolsku1.NUMERO_ORDEN_OPTICA                                                     ,\n\t\tbolsku1.CANTIDAD_ARTICULOS                                                      ,\n\t\tbolsku1.TOTAL_PAGADO_REAL                                                       ,\n\t\tbolsku1.CLAVE_HOMOLOGADA                                                        ,\n\t\tbolsku1.MONTO_REBAJA                                                            ,\n\t\tbolsku1.PRECIO_ACTUAL_SKU                                                       ,\n\t\tbolsku1.MONTO_DESCUENTO                                                         ,\n\t\tbolsku1.MONTO_IMPUESTO                                                          ,\n\t\tbolsku1.MONTO_IMPUESTO1                                                         ,\n\t\tbolsku1.MONTO_IMPUESTO2                                                         ,\n\t\tbolsku1.MONTO_IMPUESTO3                                                         ,\n\t\tbolsku1.TOTAL_POR_SKU                                                           ,\n\t\tmotiv.ID_CATALOGO as ID_MOTIVO_DEVOLUCION                                       ,\n\t\tsku.ID_PRODUCTO as ID_SKU                                                                      \nFROM staging.boletas_en_buzon_sku bolsku1\n\tLEFT JOIN shared.CATALOGOS term ON bolsku1.ID_TERMINAL_POS=term.CLAVE_HOMOLOGADA\n\tLEFT JOIN shared.TIENDAS_Y_LOCACIONES tiend1 ON bolsku1.ID_TIENDA_ORIGINAL =tiend1.CLAVE_HOMOLOGADA \t \n\tLEFT JOIN shared.TIENDAS_Y_LOCACIONES tiend2 ON bolsku1.ID_TIENDA = tiend2.CLAVE_HOMOLOGADA\t\t\n\tLEFT JOIN shared.CATALOGOS motiv ON bolsku1.ID_MOTIVO_DEVOLUCION=motiv.CLAVE_HOMOLOGADA\t\n\tINNER JOIN shared.PRODUCTOS sku ON bolsku1.CLAVE_HOMOLOGADA=sku.CLAVE_HOMOLOGADA \nWHERE term.ENTIDAD_ORIGEN='TERMINAL_POS'\n\t AND  motiv.ENTIDAD_ORIGEN='MOTIVO_DEVOLUCION'",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=boletas",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "insert_in_actual_sku"
+            },
+            {
+                "name": "w_forma_pago",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "w_forma_pago",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_3,body_2,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15,body_17,body_18,body_20,body_21,body_23,body_24,body_26,body_27,body_29,body_30,body_32,body_33,body_35,body_36,body_38,body_39,body_41,body_42,body_44,body_45,body_47,body_48,body_50,body_51,body_54,body_53,body_56,body_57,body_59,body_60,body_62,body_63,body_65,body_66,body_68,body_69,body_71,body_72,body_74,body_75,body_77,body_78,body_80,body_81,body_83,body_84,body_86,body_87,body_89,body_90,body_92,body_93,body_95,body_96,body_98,body_99,body_101,body_102,body_104,body_105,body_107,body_108\nrename body_1 ID_CLIENTE_CLIENTES\nrename body_4 HORA\nrename body_7 FECHA\nrename body_10 ID_TIENDA\nrename body_13 NUMERO_DE_TICKET\nrename body_16 ID_TERMINAL_POS\nrename body_19 NUMERO_BOLETA_BOLETAS_EN_BUZON\nrename body_22 NUMERO_DE_RENGLON\nrename body_25 ID_EMPRESA\nrename body_28 ID_TIPO_TRANSACCION\nrename body_31 ID_TARJETA\nrename body_34 LLAVE_SUBROGADA_TARJETA_ENMASCARADA\nrename body_37 ID_MEDIO_INGRESO_CLAVE_DE_TARJETA\nrename body_40 NUMERO_AUTORIZACION_BANCARIA\nrename body_43 ID_TIPO_DE_PAGO\nrename body_46 TOTAL_TRANSACCION\nrename body_49 MONTO_IMPUESTO1\nrename body_52 MONTO_IMPUESTO2\nrename body_55 MONTO_IMPUESTO3\nrename body_58 TOTAL_ANTES_DE_IMPUESTO\nrename body_61 COSTO_DE_MSI\nrename body_64 MONTO_IMPUESTO4\nrename body_67 NUMERO_DE_CUENTA\nrename body_70 LLAVE_SUBROGADA_CUENTA_ENMASCARADA\nrename body_73 ID_PLAN\nrename body_76 ID_VENDEDOR\nrename body_79 ID_BANCO\nrename body_82 ESTADO_TRANSACCION\nrename body_85 BANDERA_TRANSACCION_ES_DE_BUZON\nrename body_88 ID_NATURALEZA_DE_EMISION_DE_TARJETA\nrename body_91 ID_TIENDA_RECEPCION\nrename body_94 ID_CANAL\nrename body_97 ID_DISPOSITIVO_VENTA\nrename body_100 BANDERA_EJECUCION_TOKEN\nrename body_103 BOLETA_ORIGINAL_DE_BUZON\nrename body_106 FECHA_ORIGINAL_DE_BUZON\nrename body_109 HASH_TARJETA\nparse-as-simple-date :FECHA yyyy-MM-dd\nset-type :TOTAL_TRANSACCION float\nset-type :MONTO_IMPUESTO1 float\nset-type :MONTO_IMPUESTO2 float\nset-type :MONTO_IMPUESTO3 float\nset-type :TOTAL_ANTES_DE_IMPUESTO float\nset-type :COSTO_DE_MSI float\nset-type :MONTO_IMPUESTO4 float",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"ID_CLIENTE_CLIENTES\",\"type\":[\"string\",\"null\"]},{\"name\":\"HORA\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"ID_TIENDA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_DE_TICKET\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TERMINAL_POS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA_BOLETAS_EN_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_DE_RENGLON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_EMPRESA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"LLAVE_SUBROGADA_TARJETA_ENMASCARADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_MEDIO_INGRESO_CLAVE_DE_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_AUTORIZACION_BANCARIA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_DE_PAGO\",\"type\":[\"string\",\"null\"]},{\"name\":\"TOTAL_TRANSACCION\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO1\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO2\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO3\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_ANTES_DE_IMPUESTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"COSTO_DE_MSI\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO4\",\"type\":[\"float\",\"null\"]},{\"name\":\"NUMERO_DE_CUENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"LLAVE_SUBROGADA_CUENTA_ENMASCARADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_PLAN\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_BANCO\",\"type\":[\"string\",\"null\"]},{\"name\":\"ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_TRANSACCION_ES_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_NATURALEZA_DE_EMISION_DE_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_RECEPCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CANAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_DISPOSITIVO_VENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_EJECUCION_TOKEN\",\"type\":[\"string\",\"null\"]},{\"name\":\"BOLETA_ORIGINAL_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA\",\"type\":[\"string\",\"null\"]}]}",
+                        "workspaceId": "e10037fa-3876-48a7-95bf-fc47d60cae43"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"ID_CLIENTE_CLIENTES\",\"type\":[\"string\",\"null\"]},{\"name\":\"HORA\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"ID_TIENDA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_DE_TICKET\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TERMINAL_POS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA_BOLETAS_EN_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_DE_RENGLON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_EMPRESA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"LLAVE_SUBROGADA_TARJETA_ENMASCARADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_MEDIO_INGRESO_CLAVE_DE_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_AUTORIZACION_BANCARIA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_DE_PAGO\",\"type\":[\"string\",\"null\"]},{\"name\":\"TOTAL_TRANSACCION\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO1\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO2\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO3\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_ANTES_DE_IMPUESTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"COSTO_DE_MSI\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO4\",\"type\":[\"float\",\"null\"]},{\"name\":\"NUMERO_DE_CUENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"LLAVE_SUBROGADA_CUENTA_ENMASCARADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_PLAN\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_BANCO\",\"type\":[\"string\",\"null\"]},{\"name\":\"ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_TRANSACCION_ES_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_NATURALEZA_DE_EMISION_DE_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_RECEPCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CANAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_DISPOSITIVO_VENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_EJECUCION_TOKEN\",\"type\":[\"string\",\"null\"]},{\"name\":\"BOLETA_ORIGINAL_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_forma_pago",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "w_forma_pago"
+            },
+            {
+                "name": "is_motivo_dev",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "is_motivo_dev",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*MOTIVO_DEV_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_forma_pago",
+                        "schema": "{\"type\":\"record\",\"name\":\"fileRecord\",\"fields\":[{\"name\":\"offset\",\"type\":\"long\"},{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "is_motivo_dev"
+            },
+            {
+                "name": "insert_forma_pago",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "insert_forma_pago",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "ingest_forma_pago",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "boletas_en_buzon_forma_pago",
+                        "columns": "ID_CLIENTE_CLIENTES,HORA,FECHA,ID_TIENDA,NUMERO_DE_TICKET,ID_TERMINAL_POS,NUMERO_BOLETA_BOLETAS_EN_BUZON,NUMERO_DE_RENGLON,ID_EMPRESA,ID_TIPO_TRANSACCION,ID_TARJETA,LLAVE_SUBROGADA_TARJETA_ENMASCARADA,ID_MEDIO_INGRESO_CLAVE_DE_TARJETA,NUMERO_AUTORIZACION_BANCARIA,ID_TIPO_DE_PAGO,TOTAL_TRANSACCION,MONTO_IMPUESTO1,MONTO_IMPUESTO2,MONTO_IMPUESTO3,TOTAL_ANTES_DE_IMPUESTO,COSTO_DE_MSI,MONTO_IMPUESTO4,NUMERO_DE_CUENTA,LLAVE_SUBROGADA_CUENTA_ENMASCARADA,ID_PLAN,ID_VENDEDOR,ID_BANCO,ESTADO_TRANSACCION,BANDERA_TRANSACCION_ES_DE_BUZON,ID_NATURALEZA_DE_EMISION_DE_TARJETA,ID_TIENDA_RECEPCION,ID_CANAL,ID_DISPOSITIVO_VENTA,BANDERA_EJECUCION_TOKEN,BOLETA_ORIGINAL_DE_BUZON,FECHA_ORIGINAL_DE_BUZON,HASH_TARJETA",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"ID_CLIENTE_CLIENTES\",\"type\":[\"string\",\"null\"]},{\"name\":\"HORA\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_DE_TICKET\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TERMINAL_POS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA_BOLETAS_EN_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_DE_RENGLON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_EMPRESA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"LLAVE_SUBROGADA_TARJETA_ENMASCARADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_MEDIO_INGRESO_CLAVE_DE_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_AUTORIZACION_BANCARIA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_DE_PAGO\",\"type\":[\"string\",\"null\"]},{\"name\":\"TOTAL_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"MONTO_IMPUESTO1\",\"type\":[\"string\",\"null\"]},{\"name\":\"MONTO_IMPUESTO2\",\"type\":[\"string\",\"null\"]},{\"name\":\"MONTO_IMPUESTO3\",\"type\":[\"string\",\"null\"]},{\"name\":\"TOTAL_ANTES_DE_IMPUESTO\",\"type\":[\"string\",\"null\"]},{\"name\":\"COSTO_DE_MSI\",\"type\":[\"string\",\"null\"]},{\"name\":\"MONTO_IMPUESTO4\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_DE_CUENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"LLAVE_SUBROGADA_CUENTA_ENMASCARADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_PLAN\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_BANCO\",\"type\":[\"string\",\"null\"]},{\"name\":\"ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_TRANSACCION_ES_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_NATURALEZA_DE_EMISION_DE_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_RECEPCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CANAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_DISPOSITIVO_VENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_EJECUCION_TOKEN\",\"type\":[\"string\",\"null\"]},{\"name\":\"BOLETA_ORIGINAL_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "w_forma_pago",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"ID_CLIENTE_CLIENTES\",\"type\":[\"string\",\"null\"]},{\"name\":\"HORA\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"ID_TIENDA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_DE_TICKET\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TERMINAL_POS\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_BOLETA_BOLETAS_EN_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_DE_RENGLON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_EMPRESA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"LLAVE_SUBROGADA_TARJETA_ENMASCARADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_MEDIO_INGRESO_CLAVE_DE_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"NUMERO_AUTORIZACION_BANCARIA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIPO_DE_PAGO\",\"type\":[\"string\",\"null\"]},{\"name\":\"TOTAL_TRANSACCION\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO1\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO2\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO3\",\"type\":[\"float\",\"null\"]},{\"name\":\"TOTAL_ANTES_DE_IMPUESTO\",\"type\":[\"float\",\"null\"]},{\"name\":\"COSTO_DE_MSI\",\"type\":[\"float\",\"null\"]},{\"name\":\"MONTO_IMPUESTO4\",\"type\":[\"float\",\"null\"]},{\"name\":\"NUMERO_DE_CUENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"LLAVE_SUBROGADA_CUENTA_ENMASCARADA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_PLAN\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_VENDEDOR\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_BANCO\",\"type\":[\"string\",\"null\"]},{\"name\":\"ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_TRANSACCION_ES_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_NATURALEZA_DE_EMISION_DE_TARJETA\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_TIENDA_RECEPCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_CANAL\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_DISPOSITIVO_VENTA\",\"type\":[\"string\",\"null\"]},{\"name\":\"BANDERA_EJECUCION_TOKEN\",\"type\":[\"string\",\"null\"]},{\"name\":\"BOLETA_ORIGINAL_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_ORIGINAL_DE_BUZON\",\"type\":[\"string\",\"null\"]},{\"name\":\"HASH_TARJETA\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "id": "insert_forma_pago"
+            },
+            {
+                "name": "insert_in_actual_forma_pago",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "insert_in_actual_forma_pago",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "INSERT INTO boletas.boletas_en_buzon_detalle_pagos(\n \t    id_linea_de_detalle, id_terminal_pos_boletas_en_buzon, fecha_transaccion_boletas_en_buzon,\n\t\thora_transaccion_boletas_en_buzon, \tid_tienda_original_boletas_en_buzon, id_tienda_boletas_en_buzon,\n    id_cliente_clientes, hora, fecha, id_tienda, numero_de_ticket, \n    id_terminal_pos, numero_boleta_boletas_en_buzon, numero_de_renglon, id_empresa, id_tipo_transaccion, \n    numero_tarjeta, llave_subrogada_tarjeta_enmascarada, id_medio_ingreso_clave_de_tarjeta, numero_autorizacion_bancaria, \n    id_tipo_de_pago, total_transaccion, monto_impuesto1, monto_impuesto2, monto_impuesto3, total_antes_de_impuesto, \n    costo_de_msi, monto_impuesto4, numero_de_cuenta, llave_subrogada_cuenta_enmascarada, id_vendedor, \n    id_banco, estado_transaccion, bandera_transaccion_es_de_buzon, id_naturaleza_de_emision_de_tarjeta, \n    id_tienda_recepcion, id_canal, id_dispositivo_entrada, bandera_ejecucion_token, boleta_original_de_buzon, \n    fecha_original_de_buzon, hash_tarjeta)\nSELECT \n\t\trow_number() OVER (PARTITION BY bfp.NUMERO_BOLETA_BOLETAS_EN_BUZON) as ID_LINEA_DE_DETALLE,\n\t\tbfp.id_terminal_pos as ID_TERMINAL_POS_BOLETAS_EN_BUZON,\n\t\tbfp.fecha as FECHA_TRANSACCION_BOLETAS_EN_BUZON,\n\t\tTO_TIMESTAMP(hora, 'HH24MI')::TIME as HORA_TRANSACCION_BOLETAS_EN_BUZON,\n\t\ttiend1.ID_TIENDA_O_LOCACION as ID_TIENDA_ORIGINAL_BOLETAS_EN_BUZON,\n\t\ttiend2.ID_TIENDA_O_LOCACION as  ID_TIENDA_BOLETAS_EN_BUZON, \t\t\t\t\t\t\t\t\t\n\t\tcli.id_cliente, TO_TIMESTAMP(hora, 'HH24MI')::TIME, fecha, tyl.id_tienda_o_locacion, numero_de_ticket, \n      pos.id_catalogo, numero_boleta_boletas_en_buzon, numero_de_renglon, emp.id_catalogo, tt.id_catalogo, \n      bfp.id_tarjeta, bfp.llave_subrogada_tarjeta_enmascarada, bfp.id_medio_ingreso_clave_de_tarjeta, bfp.numero_autorizacion_bancaria, \n      tp.id_catalogo, total_transaccion, bfp.monto_impuesto1, bfp.monto_impuesto2, bfp.monto_impuesto3, bfp.total_antes_de_impuesto, \n      costo_de_msi, bfp.monto_impuesto4, bfp.numero_de_cuenta, bfp.llave_subrogada_cuenta_enmascarada, ven.id_catalogo, \n      ban.id_catalogo, bfp.estado_transaccion, bfp.bandera_transaccion_es_de_buzon, id_naturaleza_de_emision_de_tarjeta, \n      tr.id_tienda_o_locacion, cv.id_catalogo, dv.id_catalogo, bfp.bandera_ejecucion_token, bfp.boleta_original_de_buzon, \n      TO_TIMESTAMP(bfp.FECHA_ORIGINAL_DE_BUZON, 'YYYY-MM-DD')::date, bfp.hash_tarjeta\nFROM \n  (   \n   SELECT\n\t\tb2.id_terminal_pos as \t\t\t\t\t\tID_TERMINAL_POS_BEX,\n\t\tb2.numero_boleta_boletas_en_buzon as \t\tNUMERO_BOLETA_BEX,\n\t\tb2.fecha as \t\t\t\t\t\t\t\tFECHA_TRANSACCION_BEX,\n\t\tTO_TIMESTAMP(b2.hora, 'HH24MI')::TIME as \tHORA_TRANSACCION_BEX,\n\t\tCAST(nullif(tiend12.ID_TIENDA_O_LOCACION, 0) AS varchar) \tID_TIENDA_ORIGINAL_BEX,\n\t\tCAST(nullif(tiend12.ID_TIENDA_O_LOCACION, 0) AS varchar) \tID_TIENDA_BEX \n   FROM staging.boletas_en_buzon_forma_pago b2 \n\t\tLEFT JOIN clientes.clientes cli2 ON cli2.clave_homologada = b2.id_cliente_clientes\n\t\tLEFT JOIN shared.tiendas_y_locaciones tyl2 ON tyl2.clave_homologada = b2.id_tienda\n\t\tLEFT JOIN shared.catalogos pos2 ON pos2.clave_homologada = b2.id_terminal_pos AND pos2.entidad_origen = 'TERMINALES_POS'\n\t\tLEFT JOIN shared.catalogos emp2 ON emp2.clave_homologada = b2.id_empresa AND emp2.entidad_origen = 'EMPRESA_SKU'\n\t\tLEFT JOIN shared.catalogos tt2 ON tt2.clave_homologada = b2.id_tipo_transaccion AND tt2.entidad_origen = 'TIPOS_DE_TRANSACCION'\n\t\tLEFT JOIN shared.catalogos tp2 ON tp2.clave_homologada = b2.id_tipo_de_pago AND tp2.entidad_origen = 'TIPOS_DE_PAGO'\n\t\tLEFT JOIN shared.catalogos ven2 ON ven2.clave_homologada = b2.id_vendedor AND ven2.entidad_origen = 'VENDEDORES'\n\t\tLEFT JOIN shared.catalogos ban2 ON ban2.clave_homologada = b2.id_banco AND ban2.entidad_origen = 'BANCOS_EMISORES'\n\t\tLEFT JOIN shared.tiendas_y_locaciones tr2 ON tr2.clave_homologada = b2.id_tienda_recepcion\n\t\tLEFT JOIN shared.catalogos cv2 ON cv2.clave_homologada = b2.id_canal AND cv2.entidad_origen = 'CANALES_DE_VENTA'\n\t\tLEFT JOIN shared.catalogos dv2 ON dv2.clave_homologada = b2.id_dispositivo_venta AND dv2.entidad_origen = 'DISPOSITIVOS_DE_VENTA'\n\t\tLEFT JOIN shared.TIENDAS_Y_LOCACIONES tiend12 ON '0000' =tiend12.CLAVE_HOMOLOGADA \t \t\t\t\t\n\t\tLEFT JOIN shared.TIENDAS_Y_LOCACIONES tiend22 ON b2.ID_TIENDA = tiend22.CLAVE_HOMOLOGADA\t\n  ) bolexist \n\tJOIN boletas.boletas_en_buzon bol \n\tON  bol.ID_TERMINAL_POS\t\t = bolexist.ID_TERMINAL_POS_BEX\n\tAND bol.NUMERO_BOLETA\t\t = bolexist.NUMERO_BOLETA_BEX\n\tAND bol.FECHA_TRANSACCION \t = bolexist.FECHA_TRANSACCION_BEX\n\tAND bol.HORA_TRANSACCION \t = bolexist.HORA_TRANSACCION_BEX\n\tAND bol.ID_TIENDA_ORIGINAL\t = bolexist.ID_TIENDA_ORIGINAL_BEX \n\tAND bol.ID_TIENDA\t \t\t = bolexist.ID_TIENDA_BEX\n,staging.boletas_en_buzon_forma_pago bfp\n\tLEFT JOIN clientes.clientes cli ON cli.clave_homologada = bfp.id_cliente_clientes\n\tLEFT JOIN shared.tiendas_y_locaciones tyl ON tyl.clave_homologada = bfp.id_tienda\n\tLEFT JOIN shared.catalogos pos ON pos.clave_homologada = bfp.id_terminal_pos AND pos.entidad_origen = 'TERMINALES_POS'\n\tLEFT JOIN shared.catalogos emp ON emp.clave_homologada = bfp.id_empresa AND emp.entidad_origen = 'EMPRESA_SKU'\n\tLEFT JOIN shared.catalogos tt ON tt.clave_homologada = bfp.id_tipo_transaccion AND tt.entidad_origen = 'TIPOS_DE_TRANSACCION'\n\tLEFT JOIN shared.catalogos tp ON tp.clave_homologada = bfp.id_tipo_de_pago AND tp.entidad_origen = 'TIPOS_DE_PAGO'\n\tLEFT JOIN shared.catalogos ven ON ven.clave_homologada = bfp.id_vendedor AND ven.entidad_origen = 'VENDEDORES'\n\tLEFT JOIN shared.catalogos ban ON ban.clave_homologada = bfp.id_banco AND ban.entidad_origen = 'BANCOS_EMISORES'\n\tLEFT JOIN shared.tiendas_y_locaciones tr ON tr.clave_homologada = bfp.id_tienda_recepcion\n\tLEFT JOIN shared.catalogos cv ON cv.clave_homologada = bfp.id_canal AND cv.entidad_origen = 'CANALES_DE_VENTA'\n\tLEFT JOIN shared.catalogos dv ON dv.clave_homologada = bfp.id_dispositivo_venta AND dv.entidad_origen = 'DISPOSITIVOS_DE_VENTA'\n\tLEFT JOIN shared.tiendas_y_locaciones tiend1 ON '0000' =tiend1.clave_homologada \t \t\t\t\t\n\tLEFT JOIN shared.tiendas_y_locaciones tiend2 ON bfp.id_tienda = tiend2.clave_homologada\t",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=boletas",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "insert_in_actual_forma_pago"
+            },
+            {
+                "name": "w_motivo_dev",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "w_motivo_dev",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9\nrename body_1 CLAVE_DEVOLUCION\nrename body_4 MOTIVO_DEVOLUCION\nrename body_7 FECHA_INICIO_TRANSACCION\nrename body_10 FECHA_FIN_TRANSACCION\nparse-as-simple-date :FECHA_INICIO_TRANSACCION yyyy-MM-dd\nparse-as-simple-date :FECHA_FIN_TRANSACCION yyyy-MM-dd",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"CLAVE_DEVOLUCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"MOTIVO_DEVOLUCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_INICIO_TRANSACCION\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"FECHA_FIN_TRANSACCION\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "fe0fc68c-8aa6-4d08-88b3-f1ab80ce40bd"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"CLAVE_DEVOLUCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"MOTIVO_DEVOLUCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_INICIO_TRANSACCION\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"FECHA_FIN_TRANSACCION\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_motivo_dev",
+                        "schema": ""
+                    }
+                ],
+                "id": "w_motivo_dev"
+            },
+            {
+                "name": "w_tipo_tsx",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "w_tipo_tsx",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12\nrename body_1 ID_TIPO_TRANSACCION\nrename body_4 DESCRIPCION_CATALOGO\nrename body_7 ESTADO_TRANSACCION\nrename body_10 DESCRIPCION_ESTADO_TRANSACCION\nrename body_13 ID_OPERACION",
+                        "on-error": "skip-error",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"ID_TIPO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"DESCRIPCION_CATALOGO\",\"type\":[\"string\",\"null\"]},{\"name\":\"ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"DESCRIPCION_ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_OPERACION\",\"type\":[\"string\",\"null\"]}]}",
+                        "workspaceId": "49ca6bdc-8d26-4e34-85a1-d0ada68c2c53"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"ID_TIPO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"DESCRIPCION_CATALOGO\",\"type\":[\"string\",\"null\"]},{\"name\":\"ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"DESCRIPCION_ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_OPERACION\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "is_motivo_dev",
+                        "schema": ""
+                    }
+                ],
+                "id": "w_tipo_tsx"
+            },
+            {
+                "name": "insert_motivo_dev",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "insert_motivo_dev",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "insert_motivo_dev",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "boletas_en_buzon_motivo_dev",
+                        "columns": "CLAVE_DEVOLUCION,MOTIVO_DEVOLUCION,FECHA_INICIO_TRANSACCION,FECHA_FIN_TRANSACCION",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "w_motivo_dev",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"CLAVE_DEVOLUCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"MOTIVO_DEVOLUCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"FECHA_INICIO_TRANSACCION\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"FECHA_FIN_TRANSACCION\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "insert_motivo_dev"
+            },
+            {
+                "name": "insert_in_actual_motivo_dev",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "insert_in_actual_motivo_dev",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginType": "jdbc",
+                        "enableAutoCommit": "false",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tipo_tsx_tmp AS (SELECT  *  FROM staging.boletas_en_buzon_tipo_tsx)\nINSERT INTO \nshared.catalogos  (id_catalogo,descripcion_catalogo, clave_homologada, entidad_origen, esquema, esta_borrado,flexfield0,flexfield1,flexfield2)\nSELECT nextval('shared.seq_catalogos_pk'), \n       DESCRIPCION_CATALOGO||'.',\n\t   ID_TIPO_TRANSACCION||ESTADO_TRANSACCION,  \n\t\t'TIPOS_DE_TRANSACCION',\n\t\t'SHARED',\n\t\t'N',\n\t\tID_TIPO_TRANSACCION,\n\t\tESTADO_TRANSACCION,\n\t\tDESCRIPCION_ESTADO_TRANSACCION\nFROM tipo_tsx_tmp\nON CONFLICT ON CONSTRAINT catalogos_nodup_rows\nDO NOTHING",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "insert_in_actual_motivo_dev"
+            },
+            {
+                "name": "insert_tipo_tsx",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "insert_tipo_tsx",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "insert_tipo_tsx",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "boletas_en_buzon_tipo_tsx",
+                        "columns": "ID_TIPO_TRANSACCION,DESCRIPCION_CATALOGO,ESTADO_TRANSACCION,DESCRIPCION_ESTADO_TRANSACCION,ID_OPERACION",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "w_tipo_tsx",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"ID_TIPO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"DESCRIPCION_CATALOGO\",\"type\":[\"string\",\"null\"]},{\"name\":\"ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"DESCRIPCION_ESTADO_TRANSACCION\",\"type\":[\"string\",\"null\"]},{\"name\":\"ID_OPERACION\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "id": "insert_tipo_tsx"
+            },
+            {
+                "name": "insert_in_actual_tipo_tsx",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "insert_in_actual_tipo_tsx",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH tipo_tsx_tmp AS (\n\tSELECT  * FROM staging.boletas_en_buzon_tipo_tsx  \n)\nINSERT INTO \nshared.catalogos  (id_catalogo,descripcion_catalogo, clave_homologada, entidad_origen, esquema, esta_borrado )\nSELECT nextval('shared.seq_catalogos_pk'), \n\tCASE WHEN \tID_OPERACION='+' THEN 'Agregar' WHEN \n\t\t\t\tID_OPERACION='-' THEN 'Borrado' ELSE 'Eliminar'\n\tEND,\n\tID_OPERACION,\n\t\t'TIPOS_DE_OPERACION',\n\t\t'SHARED',\n\t\t'N' \nFROM tipo_tsx_tmp GROUP BY ID_OPERACION\nON CONFLICT ON CONSTRAINT catalogos_nodup_rows\nDO NOTHING",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=shared",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "insert_in_actual_tipo_tsx"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Data Pipeline Application",
+        "maxConcurrentRuns": 1
+    }
+}

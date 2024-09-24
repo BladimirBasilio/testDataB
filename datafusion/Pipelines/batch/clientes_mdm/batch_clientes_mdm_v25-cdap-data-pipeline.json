@@ -1,0 +1,612 @@
+{
+    "name": "batch_clientes_mdm_v25",
+    "description": "Procesar los 4 archivos de Clientes MDM",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.3.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "GCSFile",
+                "to": "CCliente"
+            },
+            {
+                "from": "CCliente",
+                "to": "WCliente",
+                "condition": true
+            },
+            {
+                "from": "CCliente",
+                "to": "CContacto",
+                "condition": false
+            },
+            {
+                "from": "WCliente",
+                "to": "LoadCliente"
+            },
+            {
+                "from": "LoadCliente",
+                "to": "TransformCliente"
+            },
+            {
+                "from": "CContacto",
+                "to": "WContacto",
+                "condition": true
+            },
+            {
+                "from": "CContacto",
+                "to": "CDireccion",
+                "condition": false
+            },
+            {
+                "from": "WContacto",
+                "to": "LoadContacto"
+            },
+            {
+                "from": "LoadContacto",
+                "to": "TransformContacto"
+            },
+            {
+                "from": "CDireccion",
+                "to": "WDireccion",
+                "condition": true
+            },
+            {
+                "from": "CDireccion",
+                "to": "WReferencia",
+                "condition": false
+            },
+            {
+                "from": "WDireccion",
+                "to": "LoadDireccion"
+            },
+            {
+                "from": "LoadDireccion",
+                "to": "TransformDireccion"
+            },
+            {
+                "from": "WReferencia",
+                "to": "LoadReferencia"
+            },
+            {
+                "from": "LoadReferencia",
+                "to": "TransformReferencia"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "GCSFile",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "GCSFile",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.16.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "filenameOnly": "false",
+                        "copyHeader": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                        "path": "${input_uri}",
+                        "serviceFilePath": "auto-detect",
+                        "format": "text",
+                        "project": "auto-detect",
+                        "recursive": "false",
+                        "referenceName": "gcs-clientes-mdm.CDP_DWH_INB_MDM_FILE.dat",
+                        "skipHeader": "false",
+                        "serviceAccountType": "filePath",
+                        "encrypted": "false",
+                        "fileEncoding": "UTF-8"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                "id": "GCSFile"
+            },
+            {
+                "name": "CCliente",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "CCliente",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*CLIENTE_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "GCSFile",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "CCliente"
+            },
+            {
+                "name": "WCliente",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WCliente",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "8de2c17d-bed4-4db3-96b5-58701439113e",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_36,body_35,body_33,body_32,body_30,body_29,body_27,body_26,body_24,body_23,body_21,body_20,body_17,body_18,body_15,body_14,body_11,body_12,body_8,body_9,body_6,body_5,body_2,body_3\ntrim body_1\ntrim body_4\ntrim body_7\ntrim body_10\ntrim body_13\ntrim body_16\ntrim body_19\ntrim body_22\ntrim body_25\ntrim body_28\ntrim body_31\ntrim body_34\ntrim body_37\nfilter-rows-on condition-true body_4 == null || body_4 =~ \"^\\W*$\"\nrename body_1 row_id\nrename body_4 id_origen\nrename body_7 primer_nombre\nrename body_10 apellido_paterno\nrename body_13 apellido_materno\nrename body_16 fecha_de_nacimiento\nrename body_19 genero\nrename body_22 rfc\nrename body_25 bloque\nrename body_28 homonimo\nrename body_31 fecha_creacion\ndrop :body_34\nrename body_37 fecha_actualizacion\nset-type :bloque integer\nparse-as-simple-date :fecha_de_nacimiento yyyy-MM-dd HH:mm:ss\nparse-as-simple-date :fecha_creacion yyyy-MM-dd HH:mm:ss\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_origen\",\"type\":[\"string\",\"null\"]},{\"name\":\"primer_nombre\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_nacimiento\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"genero\",\"type\":[\"string\",\"null\"]},{\"name\":\"rfc\",\"type\":[\"string\",\"null\"]},{\"name\":\"bloque\",\"type\":[\"int\",\"null\"]},{\"name\":\"homonimo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_creacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "on-error": "skip-error"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_origen\",\"type\":[\"string\",\"null\"]},{\"name\":\"primer_nombre\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_nacimiento\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"genero\",\"type\":[\"string\",\"null\"]},{\"name\":\"rfc\",\"type\":[\"string\",\"null\"]},{\"name\":\"bloque\",\"type\":[\"int\",\"null\"]},{\"name\":\"homonimo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_creacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "CCliente",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WCliente"
+            },
+            {
+                "name": "CContacto",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "CContacto",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*CONTACTO_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "CCliente",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "CContacto"
+            },
+            {
+                "name": "LoadCliente",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LoadCliente",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-cliente-mdm",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "cliente_mdm",
+                        "columns": "row_id, id_origen, primer_nombre, apellido_paterno, apellido_materno, fecha_de_nacimiento, genero, rfc, bloque, homonimo, fecha_creacion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_origen\",\"type\":[\"string\",\"null\"]},{\"name\":\"primer_nombre\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_nacimiento\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"genero\",\"type\":[\"string\",\"null\"]},{\"name\":\"rfc\",\"type\":[\"string\",\"null\"]},{\"name\":\"bloque\",\"type\":[\"int\",\"null\"]},{\"name\":\"homonimo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_creacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WCliente",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_origen\",\"type\":[\"string\",\"null\"]},{\"name\":\"primer_nombre\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_paterno\",\"type\":[\"string\",\"null\"]},{\"name\":\"apellido_materno\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_nacimiento\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"genero\",\"type\":[\"string\",\"null\"]},{\"name\":\"rfc\",\"type\":[\"string\",\"null\"]},{\"name\":\"bloque\",\"type\":[\"int\",\"null\"]},{\"name\":\"homonimo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_creacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LoadCliente"
+            },
+            {
+                "name": "TransformCliente",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TransformCliente",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH mdm AS (\n\tSELECT id_cliente_mdm, row_id, id_origen, primer_nombre, apellido_paterno, apellido_materno, \n\t\tfecha_de_nacimiento, genero, rfc, bloque, homonimo, fecha_creacion, fecha_actualizacion\n\tFROM staging.cliente_mdm\n), cli AS (\n\tINSERT INTO clientes.clientes(id_cliente, primer_nombre, apellido_paterno, apellido_materno, \n\t\tfecha_de_nacimiento, genero, rfc, bloque, homonimo, fecha_creacion, fecha_actualizacion)\n\tSELECT id_cliente_mdm, primer_nombre, apellido_paterno, apellido_materno, \n\t\tfecha_de_nacimiento, genero, rfc, bloque, homonimo, fecha_creacion, fecha_actualizacion\n\tFROM\n\t\tmdm\n\tON CONFLICT ON CONSTRAINT pk_clientes\n\tDO NOTHING\n), mrg AS (\n\tINSERT INTO clientes.clientes_merge(id_cliente_unico, rowid, id_cliente)\n\tSELECT nextval('clientes.seq_clientes_merge_pk'::regclass), row_id, id_cliente_mdm\n\tFROM\n\t\tmdm\n  ON CONFLICT ON CONSTRAINT clientes_merge_uq\n  DO NOTHING\n)\nINSERT INTO clientes.cliente_ids(id_cliente_ids, id_origen, id_cliente,id_sistema_origen)\nSELECT nextval('clientes.seq_cliente_ids_pk'::regclass), id_origen, id_cliente_mdm, so.id_catalogo\nFROM mdm \nLEFT JOIN shared.catalogos so ON so.clave_homologada = 'MDM' AND so.entidad_origen = 'SISTEMAS_DE_ORIGEN'\nON CONFLICT ON CONSTRAINT cliente_ids_nodup_rows\nDO NOTHING",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=clientes",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TransformCliente"
+            },
+            {
+                "name": "WContacto",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WContacto",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15,body_17,body_18,body_20,body_21,body_23,body_24\ntrim body_1\ntrim body_4\ntrim body_7\ntrim body_10\ntrim body_13\ntrim body_16\ntrim body_19\ntrim body_22\ntrim body_25\nrename body_1 row_id\nrename body_4 medio_contacto\nrename body_7 tipo\nrename body_10 fuente\nrename body_13 tipo_contacto\nrename body_16 fecha_creacion\nrename body_19 fecha_actualizacion\nrename body_22 id_origen_externo\ndrop :body_25\nparse-as-simple-date :fecha_creacion yyyy-MM-dd HH:mm:ss\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd HH:mm:ss",
+                        "on-error": "skip-error",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"medio_contacto\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fuente\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_contacto\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_creacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"id_origen_externo\",\"type\":[\"string\",\"null\"]}]}",
+                        "workspaceId": "038c66ef-7197-405c-b455-e898739f4760"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"medio_contacto\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fuente\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_contacto\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_creacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"id_origen_externo\",\"type\":[\"string\",\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "CContacto",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WContacto"
+            },
+            {
+                "name": "CDireccion",
+                "plugin": {
+                    "name": "Conditional",
+                    "type": "condition",
+                    "label": "CDireccion",
+                    "artifact": {
+                        "name": "condition-plugins",
+                        "version": "1.6.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "expression": "runtime['input_uri'] =~ \".*DIRECCION_.*\""
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "CContacto",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "CDireccion"
+            },
+            {
+                "name": "LoadContacto",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LoadContacto",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-contacto-mdm",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "contacto_mdm",
+                        "columns": "row_id, medio_contacto, tipo, fuente, tipo_contacto, fecha_creacion, fecha_actualizacion, id_origen_externo",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"medio_contacto\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fuente\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_contacto\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_creacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"id_origen_externo\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WContacto",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"medio_contacto\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo\",\"type\":[\"string\",\"null\"]},{\"name\":\"fuente\",\"type\":[\"string\",\"null\"]},{\"name\":\"tipo_contacto\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_creacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"id_origen_externo\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "id": "LoadContacto"
+            },
+            {
+                "name": "TransformContacto",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TransformContacto",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH cto_mdm AS (\n\tSELECT sc.id_cliente_mdm, so.*\n\tFROM staging.contacto_mdm so INNER JOIN staging.cliente_mdm sc \n\tON so.row_id = sc.row_id\n)\nUPDATE clientes.clientes cc\nSET medio_contacto = cto_mdm.medio_contacto, tipo = cto_mdm.tipo, fuente = cto_mdm.fuente,\n\ttipo_contacto = cto_mdm.tipo_contacto, fecha_creacion = cto_mdm.fecha_creacion,\n\tfecha_actualizacion = cto_mdm.fecha_actualizacion, id_origen_externo = cto_mdm.id_origen_externo\nFROM cto_mdm\nWHERE cc.id_cliente = cto_mdm.id_cliente_mdm",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=clientes",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TransformContacto"
+            },
+            {
+                "name": "WDireccion",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WDireccion",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15,body_17,body_18,body_20,body_21,body_23,body_24,body_26,body_27,body_29,body_30,body_32,body_33,body_35,body_36,body_38,body_39,body_41,body_42,body_44,body_45,body_47,body_48,body_50,body_51,body_53,body_54\ntrim body_1\ntrim body_4\ntrim body_7\ntrim body_10\ntrim body_13\ntrim body_16\ntrim body_19\ntrim body_22\ntrim body_25\ntrim body_28\ntrim body_31\ntrim body_34\ntrim body_37\ntrim body_40\ntrim body_43\ntrim body_46\ntrim body_49\ntrim body_52\ntrim body_55\nrename body_1 row_id\nrename body_4 calle\nrename body_7 numero_exterior\nrename body_10 numero_interior\nrename body_13 edificio\nrename body_16 id_estado\nrename body_19 estado\nrename body_22 id_municipio\nrename body_25 municipio\nrename body_28 id_colonia\nrename body_31 colonia\nrename body_34 codigo_postal\nrename body_37 entre_calle1\nrename body_40 entre_calle2\nrename body_43 pais\nrename body_46 id_sistema_origen\nrename body_49 fecha_creacion\nrename body_52 fecha_actualizacion\ndrop :body_55\nparse-as-simple-date :fecha_creacion yyyy-MM-dd HH:mm:ss\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd HH:mm:ss",
+                        "on-error": "skip-error",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_exterior\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_interior\",\"type\":[\"string\",\"null\"]},{\"name\":\"edificio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_estado\",\"type\":[\"string\",\"null\"]},{\"name\":\"estado\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal\",\"type\":[\"string\",\"null\"]},{\"name\":\"entre_calle1\",\"type\":[\"string\",\"null\"]},{\"name\":\"entre_calle2\",\"type\":[\"string\",\"null\"]},{\"name\":\"pais\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_sistema_origen\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_creacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "5d5d135a-7bf7-4c64-b49d-064fcf0bfaed"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_exterior\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_interior\",\"type\":[\"string\",\"null\"]},{\"name\":\"edificio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_estado\",\"type\":[\"string\",\"null\"]},{\"name\":\"estado\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal\",\"type\":[\"string\",\"null\"]},{\"name\":\"entre_calle1\",\"type\":[\"string\",\"null\"]},{\"name\":\"entre_calle2\",\"type\":[\"string\",\"null\"]},{\"name\":\"pais\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_sistema_origen\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_creacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "CDireccion",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WDireccion"
+            },
+            {
+                "name": "WReferencia",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "WReferencia",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.3.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "directives": "parse-as-csv :body '|||' false\ndrop :body\ndrop :body_2,body_3,body_5,body_6,body_8,body_9,body_11,body_12,body_14,body_15,body_17,body_18,body_19\ntrim body_1\ntrim body_4\ntrim body_7\ntrim body_10\ntrim body_13\ntrim body_16\nrename body_1 row_id\nrename body_4 id_origen\nrename body_7 referencia\nrename body_10 fuente\nrename body_13 fecha_de_carga\nrename body_16 fecha_actualizacion\nparse-as-simple-date :fecha_de_carga yyyy-MM-dd HH:mm:ss\nparse-as-simple-date :fecha_actualizacion yyyy-MM-dd HH:mm:ss",
+                        "on-error": "skip-error",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_origen\",\"type\":[\"string\",\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"fuente\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_carga\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                        "workspaceId": "cdba9b57-261d-4b9c-9eff-37a30cdce9ea"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_origen\",\"type\":[\"string\",\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"fuente\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_carga\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "CDireccion",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "WReferencia"
+            },
+            {
+                "name": "LoadDireccion",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LoadDireccion",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-direccion-mdm",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "direccion_mdm",
+                        "columns": "row_id, calle, numero_exterior, numero_interior, edificio, id_estado, estado, id_municipio, municipio, id_colonia, colonia, codigo_postal, entre_calle1, entre_calle2, pais, id_sistema_origen, fecha_creacion, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WDireccion",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"calle\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_exterior\",\"type\":[\"string\",\"null\"]},{\"name\":\"numero_interior\",\"type\":[\"string\",\"null\"]},{\"name\":\"edificio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_estado\",\"type\":[\"string\",\"null\"]},{\"name\":\"estado\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"municipio\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"colonia\",\"type\":[\"string\",\"null\"]},{\"name\":\"codigo_postal\",\"type\":[\"string\",\"null\"]},{\"name\":\"entre_calle1\",\"type\":[\"string\",\"null\"]},{\"name\":\"entre_calle2\",\"type\":[\"string\",\"null\"]},{\"name\":\"pais\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_sistema_origen\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_creacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LoadDireccion"
+            },
+            {
+                "name": "TransformDireccion",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TransformDireccion",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=clientes",
+                        "enableAutoCommit": "false",
+                        "query": "WITH dm AS (\n\tSELECT sc.id_cliente_mdm, sd.*\n\tFROM staging.direccion_mdm sd INNER JOIN staging.cliente_mdm sc \n\tON sd.row_id = sc.row_id\n)\nINSERT INTO clientes.cliente_direcciones(\n\tid_direccion_del_cliente, id_cliente, calle, numero_exterior, numero_interior, edificio, \n\tid_estado_del_pais, id_municipio, id_colonia, codigo_postal, entre_calle_1, entre_calle_2,\n\tid_pais, id_sistema_origen, fecha_creacion, fecha_actualizacion)\nSELECT nextval('clientes.seq_cliente_direcciones_pk'::regclass), dm.id_cliente_mdm, dm.calle, dm.numero_exterior, dm.numero_interior, \n\tdm.edificio, edo.id_catalogo, mpo.id_catalogo, col.id_catalogo, dm.codigo_postal, dm.entre_calle1, dm.entre_calle2, \n\tpai.id_catalogo, so.id_catalogo, dm.fecha_creacion, dm.fecha_actualizacion\nFROM\n\tdm\nINNER JOIN shared.catalogos edo ON edo.descripcion_catalogo = dm.estado\nINNER JOIN shared.catalogos mpo ON mpo.descripcion_catalogo = dm.municipio\nINNER JOIN shared.catalogos col ON col.descripcion_catalogo = dm.colonia\nINNER JOIN shared.catalogos pai ON pai.descripcion_catalogo = dm.pais\nINNER JOIN shared.catalogos so ON so.descripcion_catalogo = dm.id_sistema_origen\n"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TransformDireccion"
+            },
+            {
+                "name": "LoadReferencia",
+                "plugin": {
+                    "name": "Database",
+                    "type": "batchsink",
+                    "label": "LoadReferencia",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "referenceName": "save-referencia-mdm",
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "tableName": "referencia_mdm",
+                        "columns": "row_id, id_origen, referencia, fuente, fecha_de_carga, fecha_actualizacion",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=staging",
+                        "enableAutoCommit": "false",
+                        "columnNameCase": "No change",
+                        "transactionIsolationLevel": "TRANSACTION_SERIALIZABLE"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_origen\",\"type\":[\"string\",\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"fuente\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_carga\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "WReferencia",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"row_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_origen\",\"type\":[\"string\",\"null\"]},{\"name\":\"referencia\",\"type\":[\"string\",\"null\"]},{\"name\":\"fuente\",\"type\":[\"string\",\"null\"]},{\"name\":\"fecha_de_carga\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"fecha_actualizacion\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]}]}"
+                    }
+                ],
+                "id": "LoadReferencia"
+            },
+            {
+                "name": "TransformReferencia",
+                "plugin": {
+                    "name": "Database",
+                    "type": "action",
+                    "label": "TransformReferencia",
+                    "artifact": {
+                        "name": "database-plugins",
+                        "version": "2.5.0",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "jdbcPluginName": "cloudsql-postgresql",
+                        "jdbcPluginType": "jdbc",
+                        "connectionString": "${db_url}",
+                        "query": "WITH ref_mdm AS (\n\tSELECT sc.id_cliente_mdm, sr.*\n\tFROM staging.referencia_mdm sr INNER JOIN staging.cliente_mdm sc \n\tON sr.row_id = sc.row_id AND sr.id_origen = sc.id_origen\n), cli AS (\n\tUPDATE clientes.clientes cc\n\tSET referencia = ref_mdm.referencia, fecha_actualizacion = ref_mdm.fecha_actualizacion\n\tFROM ref_mdm\n\tWHERE cc.id_cliente = ref_mdm.id_cliente_mdm\n)\nUPDATE clientes.clientes_merge cm\nSET fuente = ref_mdm.fuente, fecha_de_carga = ref_mdm.fecha_de_carga\nFROM ref_mdm\nWHERE cm.id_cliente = ref_mdm.id_cliente_mdm",
+                        "user": "${db_username}",
+                        "password": "${db_password}",
+                        "connectionArguments": "currentSchema=clientes",
+                        "enableAutoCommit": "false"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "TransformReferencia"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Procesar los 4 archivos de Clientes MDM",
+        "maxConcurrentRuns": 1
+    }
+}
